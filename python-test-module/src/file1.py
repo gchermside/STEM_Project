@@ -76,6 +76,37 @@ cv2.waitKey(0)
 # and finally destroy/close all open windows
 cv2.destroyAllWindows()
 
+def compareHands(hand1, hand2):
+    difTotal = 0
+    for i in range(0,21):
+        currentX =hand1.landmark[i].x - hand2.landmark[i].x
+        currentX = currentX * currentX
+        currentY =hand1.landmark[i].y - hand2.landmark[i].y
+        currentY = currentY * currentY
+        currentZ =hand1.landmark[i].z - hand2.landmark[i].z
+        currentZ = currentZ * currentZ
+        curPointDif = currentX + currentY + currentZ
+        difTotal = difTotal + curPointDif
+    return difTotal
+
+def regularize(hand):
+    xShift = hand.landmark[0].x
+    yShift = hand.landmark[0].y
+    zShift = hand.landmark[0].z
+    for lm in hand.landmark:
+        lm.x = lm.x - xShift
+        lm.y = lm.y - yShift
+        lm.z = lm.z - zShift
+    p1 = hand.landmark[1]
+    mult = 1/(((p1.x)**2 + (p1.y)**2 + (p1.z)**2)**(1/2))
+    for lm in hand.landmark:
+        lm.x = lm.x * mult
+        lm.y = lm.y * mult
+        lm.z = lm.z * mult
+
+
+
+
 
 # For webcam input:
 cap = cv2.VideoCapture(0)
@@ -119,29 +150,20 @@ with mp_hands.Hands(
             resultsList.append(results)
             if len(resultsList) == 2:
                 break
-    difTotal = 0
-    # for hand_landmarks in resultsList[0].multi_hand_landmarks:
-    #     print('hand_landmarks:', hand_landmarks)
 
-    for result in resultsList:
-        print("---- Result -----")
-        hand = result.multi_hand_landmarks[0]
-        landmarks = hand.landmark
-        for landmark in landmarks:
-            print(f"landmark: {landmark.x} {landmark.y} {landmark.z}")
+    # resultsList[1].multi_hand_landmarks[0]
+    hands = [x.multi_hand_landmarks[0] for x in resultsList]
+    for hand in hands:
+        regularize(hand)
+    handDif2 = compareHands(hands[0], hands[1])
+    print(f"handDif2 {handDif2}")
+    # for result in resultsList:
+    #     print("---- Result -----")
+    #     hand = result.multi_hand_landmarks[0]
+    #     landmarks = hand.landmark
+    #     for landmark in landmarks:
+    #         print(f"landmark: {landmark.x} {landmark.y} {landmark.z}")
 
-    print(f"resultsList: {resultsList}")
-    print(f"thing {resultsList[0].multi_hand_landmarks[0].landmark[0].x}")
-    for i in range(0,21):
-        currentX =resultsList[0].multi_hand_landmarks[0].landmark[i].x - resultsList[1].multi_hand_landmarks[0].landmark[i].x
-        currentX = currentX * currentX
-        currentY =resultsList[0].multi_hand_landmarks[0].landmark[i].y - resultsList[1].multi_hand_landmarks[0].landmark[i].y
-        currentY = currentY * currentY
-        currentZ =resultsList[0].multi_hand_landmarks[0].landmark[i].z - resultsList[1].multi_hand_landmarks[0].landmark[i].z
-        currentZ = currentZ * currentZ
-        curPointDif = currentX + currentY + currentZ
-        difTotal = difTotal + curPointDif
-    print(f"difTotal {difTotal}")
 
 
 
