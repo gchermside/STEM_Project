@@ -1,74 +1,15 @@
 import cv2
 import mediapipe as mp
+import json
+import Hand
 print("Hello world")
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
-# help(mp_hands.Hands)
 
-# path3 = r'C:\Users\Genevieve\Downloads\l3.jpg'
-# path2 = r'C:\Users\Genevieve\Downloads\l2.jpg'
-# path1 = r'C:\Users\Genevieve\Downloads\l1.jpg'
-# IMAGE_FILES = [path1, path2, path3]
 resultsList = []
-
-# for path in IMAGE_FILES:
-#     image = cv2.flip(cv2.imread(path), 1)
-#     cv2.imshow(path, image)
-#     with mp_hands.Hands(
-#         static_image_mode=True,
-#         max_num_hands=1,
-#         min_detection_confidence=0.5) as hands:
-#         # Read an image, flip it around y-axis for correct handedness output (see
-#         # above).
-#         # Convert the BGR image to RGB before processing.
-#         rgbimage = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-#         results = hands.process(rgbimage)
-#
-#
-#         # Print handedness and draw hand landmarks on the image.
-#         print('Handedness:', results.multi_handedness)
-#         image_height, image_width, _ = image.shape
-#         annotated_image = image.copy()
-#         hand_landmarks = results.multi_hand_landmarks[0]
-#         # mp_drawing.draw_landmarks(
-#         #     rgbimage,
-#         #     hand_landmarks,
-#         #     mp_hands.HAND_CONNECTIONS,
-#         #     mp_drawing_styles.get_default_hand_landmarks_style(),
-#         #     mp_drawing_styles.get_default_hand_connections_style())
-#         for hand_world_landmarks in results.multi_hand_world_landmarks:
-#             mp_drawing.plot_landmarks(
-#                 hand_world_landmarks, mp_hands.HAND_CONNECTIONS, azimuth=5)
-#         for hand_landmarks in results.multi_hand_landmarks:
-#             print('hand_landmarks:', hand_landmarks)
-#             print(
-#                 f'Index finger tip coordinates: (',
-#                 f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * image_width}, '
-#                 f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * image_height})'
-#             )
-#             mp_drawing.draw_landmarks(
-#                 annotated_image,
-#                 hand_landmarks,
-#                 mp_hands.HAND_CONNECTIONS,
-#                 mp_drawing_styles.get_default_hand_landmarks_style(),
-#                 mp_drawing_styles.get_default_hand_connections_style())
-#         # Draw hand world landmarks.
-#         for hand_world_landmarks in results.multi_hand_world_landmarks:
-#             mp_drawing.plot_landmarks(
-#                 hand_world_landmarks, mp_hands.HAND_CONNECTIONS, azimuth=5)
-#
-# for results in resultsList:
-#     mp_drawing.draw_landmarks(
-#         annotated_image,
-#         hand_landmarks,
-#         mp_hands.HAND_CONNECTIONS,
-#         mp_drawing_styles.get_default_hand_landmarks_style(),
-#         mp_drawing_styles.get_default_hand_connections_style())
-#     for hand_world_landmarks in results.multi_hand_world_landmarks:
-#         mp_drawing.plot_landmarks(
-#             hand_world_landmarks, mp_hands.HAND_CONNECTIONS, azimuth=5)
-#
+with open('data.json', 'r') as file:
+    handStorage = json.load(file)
 
 
 # add wait key. window waits until user presses a key
@@ -79,11 +20,11 @@ cv2.destroyAllWindows()
 def compareHands(hand1, hand2):
     difTotal = 0
     for i in range(0,21):
-        currentX =hand1.landmark[i].x - hand2.landmark[i].x
+        currentX = hand1["landmarks"][i][0] - hand2["landmarks"][i][0]
         currentX = currentX * currentX
-        currentY =hand1.landmark[i].y - hand2.landmark[i].y
+        currentY = hand1["landmarks"][i][1] - hand2["landmarks"][i][1]
         currentY = currentY * currentY
-        currentZ =hand1.landmark[i].z - hand2.landmark[i].z
+        currentZ = hand1["landmarks"][i][2] - hand2["landmarks"][i][2]
         currentZ = currentZ * currentZ
         curPointDif = currentX + currentY + currentZ
         difTotal = difTotal + curPointDif
@@ -104,8 +45,15 @@ def regularize(hand):
         lm.y = lm.y * mult
         lm.z = lm.z * mult
 
-
-
+def find(hand):
+    word = "no match"
+    sureness = 150
+    for possibleMatch in handStorage:
+        closeness = compareHands(hand, possibleMatch)
+        if closeness<sureness:
+            sureness = closeness
+            word = possibleMatch["hand_shape"]
+    return word
 
 
 # For webcam input:
@@ -148,28 +96,41 @@ with mp_hands.Hands(
         elif key_pressed % 256 == 32:
             cv2.imshow('Capture', cv2.flip(image, 1))
             resultsList.append(results)
-            if len(resultsList) == 2:
+            #since mirroring is being wrong, I'm switching the handedness
+            isRightHand = True
+            if(results.multi_handedness[0] == "Right"):
+                isRightHand = False
+            regularize(results.multi_hand_landmarks[0])
+            userInput = input("Please enter what handshape that was, none to delete the picture, or find to find what sign it is: ")
+            if(userInput == "none") :
+                print("ok, we won't store that photo")
+            elif(userInput == "find") :
+                hand = {
+                    "hand_shape": "unknown",
+                    "isRightHand": isRightHand,
+                    "landmarks": [[lm.x, lm.y, lm.z] for lm in results.multi_hand_landmarks[0].landmark],
+                    "world_landmarks": [[lm.x, lm.y, lm.z] for lm in results.multi_hand_world_landmarks[0].landmark],
+                }
+                guess = find(hand)
+            else:
+                hand = {
+                    "hand_shape": userInput,
+                    "isRightHand": isRightHand,
+                    "landmarks": [[lm.x, lm.y, lm.z] for lm in results.multi_hand_landmarks[0].landmark],
+                    "world_landmarks": [[lm.x, lm.y, lm.z] for lm in results.multi_hand_world_landmarks[0].landmark],
+                }
+                handStorage.append(hand)
+            shouldContinue = input("Would you like to continue? Type yes or no: ")
+            if(shouldContinue == "yes"):
+                print("ok, take another picture")
+            elif(shouldContinue == "no"):
                 break
-
-    # resultsList[1].multi_hand_landmarks[0]
-    hands = [x.multi_hand_landmarks[0] for x in resultsList]
-    for hand in hands:
-        regularize(hand)
-    handDif2 = compareHands(hands[0], hands[1])
-    print(f"handDif2 {handDif2}")
-    # for result in resultsList:
-    #     print("---- Result -----")
-    #     hand = result.multi_hand_landmarks[0]
-    #     landmarks = hand.landmark
-    #     for landmark in landmarks:
-    #         print(f"landmark: {landmark.x} {landmark.y} {landmark.z}")
+            else:
+                print("That wasn't a yes or no, I'm going to go break now, sorry.")
 
 
+    with open('data.json', 'w') as file:
+        json.dump(handStorage, file, indent=2)
 
 
 cap.release()
-
-# 0.25868996621453844                    - similar-ish
-# difTotal 0.0045767651950870784         - basically the same
-# difTotal 3.447838967408188              same shape different spot
-#difTotal 0.523087603573555               palm vs fist
