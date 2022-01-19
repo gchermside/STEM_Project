@@ -52,15 +52,16 @@ def regularize(hand):
         lm.z = lm.z * mult
 
 def find(hand):
-    word = "no match"
-    sureness = 150
+    words = [("no match", 150)]
     for signName in handStorage.keys():
         for possibleHand in handStorage[signName]:
             closeness = compareHands(hand, possibleHand)
-            if closeness<sureness:
-                sureness = closeness
-                word = signName
-    return word
+            if closeness<150:
+                for i in range(0,len(words)):
+                    if closeness<words[i][1]:
+                        words.insert(i,(signName, closeness))
+                        break
+    return words
 
 
 # For webcam input:
@@ -118,7 +119,7 @@ with mp_hands.Hands(
                 guess = find(hand)
                 print(f"guess {guess}")
             elif(userInput == "yes"):
-                word = input("ok, and what word was it, or none to delete")
+                word = input("ok, and what word was it, or none to delete: ")
                 if(word != "none"):
                     hand = Hand.Hand(
                         isRightHand,
