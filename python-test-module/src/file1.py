@@ -8,9 +8,15 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 
 resultsList = []
-with open('data.json', 'r') as file:
-    handStorage = json.load(file)
 
+def readFile():
+    with open('data.json', 'r') as file:
+        jsonReadableStorage = json.load(file)
+
+    return {
+        signName: [Hand.fromJson(handJson) for handJson in jsonReadableStorage[signName]] for signName in jsonReadableStorage.keys()
+    }
+handStorage = readFile()
 
 # add wait key. window waits until user presses a key
 cv2.waitKey(0)
@@ -20,11 +26,11 @@ cv2.destroyAllWindows()
 def compareHands(hand1, hand2):
     difTotal = 0
     for i in range(0,21):
-        currentX = hand1["landmarks"][i][0] - hand2["landmarks"][i][0]
+        currentX = hand1.landmarks[i][0] - hand2.landmarks[i][0]
         currentX = currentX * currentX
-        currentY = hand1["landmarks"][i][1] - hand2["landmarks"][i][1]
+        currentY = hand1.landmarks[i][1] - hand2.landmarks[i][1]
         currentY = currentY * currentY
-        currentZ = hand1["landmarks"][i][2] - hand2["landmarks"][i][2]
+        currentZ = hand1.landmarks[i][2] - hand2.landmarks[i][2]
         currentZ = currentZ * currentZ
         curPointDif = currentX + currentY + currentZ
         difTotal = difTotal + curPointDif
@@ -48,11 +54,12 @@ def regularize(hand):
 def find(hand):
     word = "no match"
     sureness = 150
-    for possibleMatch in handStorage:
-        closeness = compareHands(hand, possibleMatch)
-        if closeness<sureness:
-            sureness = closeness
-            word = possibleMatch["hand_shape"]
+    for signName in handStorage.keys():
+        for possibleHand in handStorage[signName]:
+            closeness = compareHands(hand, possibleHand)
+            if closeness<sureness:
+                sureness = closeness
+                word = signName
     return word
 
 
@@ -101,25 +108,29 @@ with mp_hands.Hands(
             if(results.multi_handedness[0] == "Right"):
                 isRightHand = False
             regularize(results.multi_hand_landmarks[0])
-            userInput = input("Please enter what handshape that was, none to delete the picture, or find to find what sign it is: ")
-            if(userInput == "none") :
-                print("ok, we won't store that photo")
-            elif(userInput == "find") :
-                hand = {
-                    "hand_shape": "unknown",
-                    "isRightHand": isRightHand,
-                    "landmarks": [[lm.x, lm.y, lm.z] for lm in results.multi_hand_landmarks[0].landmark],
-                    "world_landmarks": [[lm.x, lm.y, lm.z] for lm in results.multi_hand_world_landmarks[0].landmark],
-                }
+            userInput = input("Please enter yes if that was an example handshape, none to delete, or find to find a match: ")
+            if(userInput == "find") :
+                hand = Hand.Hand(
+                    isRightHand= isRightHand,
+                    landmarks = [[lm.x, lm.y, lm.z] for lm in results.multi_hand_landmarks[0].landmark],
+                    world_landmarks = [[lm.x, lm.y, lm.z] for lm in results.multi_hand_world_landmarks[0].landmark]
+                )
                 guess = find(hand)
+                print(f"guess {guess}")
+            elif(userInput == "yes"):
+                word = input("ok, and what word was it, or none to delete")
+                if(word != "none"):
+                    hand = Hand.Hand(
+                        isRightHand,
+                        [[lm.x, lm.y, lm.z] for lm in results.multi_hand_landmarks[0].landmark],
+                        [[lm.x, lm.y, lm.z] for lm in results.multi_hand_world_landmarks[0].landmark]
+                    )
+                    if word in handStorage:
+                        handStorage[word].append(hand)
+                    else:
+                        handStorage[word] = [hand]
             else:
-                hand = {
-                    "hand_shape": userInput,
-                    "isRightHand": isRightHand,
-                    "landmarks": [[lm.x, lm.y, lm.z] for lm in results.multi_hand_landmarks[0].landmark],
-                    "world_landmarks": [[lm.x, lm.y, lm.z] for lm in results.multi_hand_world_landmarks[0].landmark],
-                }
-                handStorage.append(hand)
+                print("we won't store that photo")
             shouldContinue = input("Would you like to continue? Type yes or no: ")
             if(shouldContinue == "yes"):
                 print("ok, take another picture")
@@ -130,7 +141,10 @@ with mp_hands.Hands(
 
 
     with open('data.json', 'w') as file:
-        json.dump(handStorage, file, indent=2)
+        jsonThing = {
+            key: [hand.toJson() for hand in handStorage[key]] for key in handStorage.keys()
+        }
+        json.dump(jsonThing, file, indent=2)
 
 
 cap.release()

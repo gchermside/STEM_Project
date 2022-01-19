@@ -1,11 +1,17 @@
 import json
 
+def fromJson(json):
+    return Hand(json["isRightHand"], json["landmarks"], json["world_landmarks"])
+
 class Hand:
     def __init__(self, isRightHand, landmarks, world_landmarks):
         self.isRightHand = isRightHand
-        self. landmarks = landmarks
+        self.landmarks = landmarks
         self.world_landmarks = world_landmarks
 
-    def toJSON(self):
-        return json.dumps(self,  default=lambda o: o.__dict__, indent=2)
-
+    def toJson(self):
+        return {
+            "isRightHand": self.isRightHand,
+            "landmarks": self.landmarks,
+            "world_landmarks": self.world_landmarks,
+        }
