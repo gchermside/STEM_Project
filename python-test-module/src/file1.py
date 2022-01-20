@@ -37,19 +37,19 @@ def compareHands(hand1, hand2):
     return difTotal
 
 def regularize(hand):
-    xShift = hand.landmark[0].x
-    yShift = hand.landmark[0].y
-    zShift = hand.landmark[0].z
-    for lm in hand.landmark:
-        lm.x = lm.x - xShift
-        lm.y = lm.y - yShift
-        lm.z = lm.z - zShift
-    p1 = hand.landmark[1]
-    mult = 1/(((p1.x)**2 + (p1.y)**2 + (p1.z)**2)**(1/2))
-    for lm in hand.landmark:
-        lm.x = lm.x * mult
-        lm.y = lm.y * mult
-        lm.z = lm.z * mult
+    xShift = hand.landmarks[0][0]
+    yShift = hand.landmarks[0][1]
+    zShift = hand.landmarks[0][2]
+    for lm in hand.landmarks:
+        lm[0] = lm[0] - xShift
+        lm[1] = lm[1] - yShift
+        lm[2] = lm[2] - zShift
+    p1 = hand.landmarks[1]
+    mult = 1/(((p1[0])**2 + (p1[0])**2 + (p1[2])**2)**(1/2))
+    for lm in hand.landmarks:
+        lm[0] = lm[0] * mult
+        lm[1] = lm[1] * mult
+        lm[2] = lm[2] * mult
 
 def find(hand):
     words = [("no match", 150)]
@@ -62,6 +62,22 @@ def find(hand):
                         words.insert(i,(signName, closeness))
                         break
     return words
+
+def touching(hand):
+    fingers = [0, 0, 0, 0]
+    howClose = .0075
+    for i in range(8, 21):
+        if i%4 == 0:
+            pointDist = ((hand.landmarks[i][0]-hand.landmarks[4][0])**2 +
+                         (hand.landmarks[i][1]-hand.landmarks[4][1])**2 +
+                         (hand.landmarks[i][2]-hand.landmarks[4][2])**2)
+            print(f"point distance {pointDist}")
+            if(pointDist<howClose):
+                fingers[i//4 - 2] = 1
+    return fingers
+
+
+
 
 
 # For webcam input:
@@ -108,14 +124,16 @@ with mp_hands.Hands(
             isRightHand = True
             if(results.multi_handedness[0] == "Right"):
                 isRightHand = False
-            regularize(results.multi_hand_landmarks[0])
+            hand = Hand.Hand(
+                isRightHand= isRightHand,
+                landmarks = [[lm.x, lm.y, lm.z] for lm in results.multi_hand_landmarks[0].landmark],
+                world_landmarks = [[lm.x, lm.y, lm.z] for lm in results.multi_hand_world_landmarks[0].landmark]
+            )
+            fingersTouching = touching(hand)
+            print(f"thumb is touching these fingers: {fingersTouching}")
+            regularize(hand)
             userInput = input("Please enter yes if that was an example handshape, none to delete, or find to find a match: ")
             if(userInput == "find") :
-                hand = Hand.Hand(
-                    isRightHand= isRightHand,
-                    landmarks = [[lm.x, lm.y, lm.z] for lm in results.multi_hand_landmarks[0].landmark],
-                    world_landmarks = [[lm.x, lm.y, lm.z] for lm in results.multi_hand_world_landmarks[0].landmark]
-                )
                 guess = find(hand)
                 print(f"guess {guess}")
             elif(userInput == "yes"):
