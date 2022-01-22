@@ -34,7 +34,21 @@ def compareHands(hand1, hand2):
         currentZ = currentZ * currentZ
         curPointDif = currentX + currentY + currentZ
         difTotal = difTotal + curPointDif
+        # hand1T = touching(hand1)
+        # hand2T = touching(hand2)
+        # for i in range(0, 4):
+        #     difTotal = difTotal + abs(hand1T[i]-hand2T[i])
     return difTotal
+
+def addNewWord(word, hand):
+    if word != "none":
+        if word in handStorage:
+            handStorage[word].append(hand)
+        else:
+            handStorage[word] = [hand]
+    else:
+        print("ok, we won't store that photo for you")
+
 
 def regularize(hand):
     xShift = hand.landmarks[0][0]
@@ -63,6 +77,7 @@ def find(hand):
                         break
     return words
 
+
 def touching(hand):
     fingers = [0, 0, 0, 0]
     howClose = .0075
@@ -71,7 +86,6 @@ def touching(hand):
             pointDist = ((hand.landmarks[i][0]-hand.landmarks[4][0])**2 +
                          (hand.landmarks[i][1]-hand.landmarks[4][1])**2 +
                          (hand.landmarks[i][2]-hand.landmarks[4][2])**2)
-            print(f"point distance {pointDist}")
             if(pointDist<howClose):
                 fingers[i//4 - 2] = 1
     return fingers
@@ -136,19 +150,11 @@ with mp_hands.Hands(
             if(userInput == "find") :
                 guess = find(hand)
                 print(f"guess {guess}")
-                word = input("If this was not correct please tell us what it was: ")
+                word = input("Please type what word it was supposed to be or none to delete the picture: ")
+                addNewWord(word, hand)
             elif(userInput == "yes"):
                 word = input("ok, and what word was it, or none to delete: ")
-                if(word != "none"):
-                    hand = Hand.Hand(
-                        isRightHand,
-                        [[lm.x, lm.y, lm.z] for lm in results.multi_hand_landmarks[0].landmark],
-                        [[lm.x, lm.y, lm.z] for lm in results.multi_hand_world_landmarks[0].landmark]
-                    )
-                    if word in handStorage:
-                        handStorage[word].append(hand)
-                    else:
-                        handStorage[word] = [hand]
+                addNewWord((word, hand))
             else:
                 print("we won't store that photo")
             shouldContinue = input("Would you like to continue? Type yes or no: ")
