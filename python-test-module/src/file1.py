@@ -136,6 +136,7 @@ with mp_hands.Hands(
             if(userInput == "find") :
                 guess = find(hand)
                 print(f"guess {guess}")
+                word = input("If this was not correct please tell us what it was: ")
             elif(userInput == "yes"):
                 word = input("ok, and what word was it, or none to delete: ")
                 if(word != "none"):
