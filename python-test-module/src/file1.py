@@ -47,7 +47,7 @@ def addNewWord(word, hand):
         else:
             handStorage[word] = [hand]
     else:
-        print("ok, we won't store that photo for you")
+        print("Ok, we won't store that photo for you.\n")
 
 
 def regularize(hand):
@@ -66,7 +66,7 @@ def regularize(hand):
         lm[2] = lm[2] * mult
 
 def find(hand):
-    words = [("no match", 150)]
+    words = [("No Match", 150)]
     for signName in handStorage.keys():
         for possibleHand in handStorage[signName]:
             closeness = compareHands(hand, possibleHand)
@@ -146,24 +146,24 @@ with mp_hands.Hands(
             fingersTouching = touching(hand)
             print(f"thumb is touching these fingers: {fingersTouching}")
             regularize(hand)
-            userInput = input("Please enter yes if that was an example handshape, none to delete, or find to find a match: ")
+            userInput = input("Please enter 'yes' if that was an example sign, 'none' to delete, or 'find' to find a match.\n")
             if(userInput == "find") :
                 guess = find(hand)
                 print(f"guess {guess}")
-                word = input("Please type what word it was supposed to be or none to delete the picture: ")
+                word = input("If this is not correct please type what word or phrase it is. If it is correct please type 'none'.\n")
                 addNewWord(word, hand)
             elif(userInput == "yes"):
-                word = input("ok, and what word was it, or none to delete: ")
+                word = input("Ok, enter what word or phrase it was, or enter 'none' to not enter the sign.\n")
                 addNewWord((word, hand))
             else:
-                print("we won't store that photo")
-            shouldContinue = input("Would you like to continue? Type yes or no: ")
+                print("We won't store that sign.\n")
+            shouldContinue = input("Would you like to continue? Type yes or no.\n")
             if(shouldContinue == "yes"):
-                print("ok, take another picture")
+                print("Ok, please take another picture.\n")
             elif(shouldContinue == "no"):
                 break
             else:
-                print("That wasn't a yes or no, I'm going to go break now, sorry.")
+                print("That wasn't a yes or no, so I am going to end this session.\n")
 
 
     with open('data.json', 'w') as file:
@@ -172,5 +172,5 @@ with mp_hands.Hands(
         }
         json.dump(jsonThing, file, indent=2)
 
-
+print("Thanks for using!\n")
 cap.release()
