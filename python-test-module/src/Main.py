@@ -10,6 +10,7 @@ mp_pose = mp.solutions.pose
 
 resultsList = []
 
+#reads data.JSON into resultsList
 def readFile():
     with open('data.json', 'r') as file:
         jsonReadableStorage = json.load(file)
@@ -24,6 +25,7 @@ cv2.waitKey(0)
 # and finally destroy/close all open windows
 cv2.destroyAllWindows()
 
+# compares two hands and returns a number that is greater the farther they are from each other
 def compareHands(hand1, hand2):
     difTotal = 0
     for i in range(0,21):
@@ -41,6 +43,9 @@ def compareHands(hand1, hand2):
         #     difTotal = difTotal + abs(hand1T[i]-hand2T[i])
     return difTotal
 
+#function that addes a new hand picture to hand storage
+#it will either put it in a list of other hands for the same word
+# or if it is a unique word, it will make a new list only including that hand for that word.
 def addNewWord(word, hand):
     if word != "none":
         if word in handStorage:
@@ -50,7 +55,8 @@ def addNewWord(word, hand):
     else:
         print("ok, we won't store that photo for you")
 
-
+# this function points moves the hand so the wrist is at 0,0 and makes it a consistant
+# porportion(the length between point 0 and 1 will always be the same on hands)
 def regularize(hand):
     xShift = hand.landmarks[0][0]
     yShift = hand.landmarks[0][1]
@@ -66,6 +72,7 @@ def regularize(hand):
         lm[1] = lm[1] * mult
         lm[2] = lm[2] * mult
 
+#function that returns a list of the most similar hands in handStorage to the passed in hand object
 def find(hand):
     words = [("no match", 150)]
     for signName in handStorage.keys():
@@ -78,7 +85,8 @@ def find(hand):
                         break
     return words
 
-
+#function that takes in a hand object and return an array of which fingertips are touching
+#the thumb, from index to pinky
 def touching(hand):
     fingers = [0, 0, 0, 0]
     howClose = .0075
@@ -93,15 +101,37 @@ def touching(hand):
 
 
 
+#this is a function where I'm plauing around with pose
+def readPose(poseResults):
+    nose = [poseResults.pose_landmarks.landmark[mp_pose.PoseLandmark.NOSE].x,
+            poseResults.pose_landmarks.landmark[mp_pose.PoseLandmark.NOSE].y,
+            poseResults.pose_landmarks.landmark[mp_pose.PoseLandmark.NOSE].z]
+    right_index = [poseResults.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_INDEX].x,
+                   poseResults.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_INDEX].y,
+                   poseResults.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_INDEX].z]
+    # left_index = [poseResults.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_INDEX].x,
+    #         poseResults.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_INDEX].y,
+    #         poseResults.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_INDEX].z]
+    disRHandToFace = [abs(nose[0]-right_index[0]), abs(nose[1]-right_index[1]), abs(nose[2]-right_index[2])]
+    print(nose)
+    print(right_index)
+    print(disRHandToFace)
+    if(disRHandToFace[0]>.25 or disRHandToFace[1]>.25):
+        print("your hand is far from your face")
+    else:
+        print("your hand is near your face")
+    # print(left_index)
+
 
 
 # For webcam input:
 cap = cv2.VideoCapture(0)
 
+#starts using pose
 with mp_pose.Pose(
         min_detection_confidence=0.5,
         min_tracking_confidence=0.5) as pose:
-
+#starts using hand
     with mp_hands.Hands(
             model_complexity=0,
             min_detection_confidence=0.5,
@@ -132,6 +162,8 @@ with mp_pose.Pose(
                         mp_hands.HAND_CONNECTIONS,
                         mp_drawing_styles.get_default_hand_landmarks_style(),
                         mp_drawing_styles.get_default_hand_connections_style())
+
+            # draws on pose lines
             mp_drawing.draw_landmarks(
                 image,
                 poseResults.pose_landmarks,
@@ -157,6 +189,7 @@ with mp_pose.Pose(
                     landmarks = [[lm.x, lm.y, lm.z] for lm in handResults.multi_hand_landmarks[0].landmark],
                     world_landmarks = [[lm.x, lm.y, lm.z] for lm in handResults.multi_hand_world_landmarks[0].landmark]
                 )
+                readPose(poseResults)
                 fingersTouching = touching(hand)
                 print(f"thumb is touching these fingers: {fingersTouching}")
                 regularize(hand)
