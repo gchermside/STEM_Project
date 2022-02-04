@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 import json
 import Hand
+import time
 print("Hello world")
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
@@ -9,7 +10,7 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
 
-#reads data.JSON into handStorage
+#reads data.JSON into handStoarage
 def readFile():
     with open('data.json', 'r') as file:
         jsonReadableStorage = json.load(file)
@@ -18,6 +19,9 @@ def readFile():
         signName: [Hand.fromJson(handJson) for handJson in jsonReadableStorage[signName]] for signName in jsonReadableStorage.keys()
     }
 handStorage = readFile()
+previousHandPics = []
+videoStarted = False
+videoHands = []
 
 # add wait key. window waits until user presses a key
 cv2.waitKey(0)
@@ -127,10 +131,11 @@ def readPose(poseResults):
 cap = cv2.VideoCapture(0)
 
 #starts using pose
+previousTime = time.time()
 with mp_pose.Pose(
         min_detection_confidence=0.5,
         min_tracking_confidence=0.5) as pose:
-#starts using hand
+    #starts using hand
     with mp_hands.Hands(
             model_complexity=0,
             min_detection_confidence=0.5,
@@ -171,17 +176,15 @@ with mp_pose.Pose(
 
             # Flip the image horizontally for a selfie-view display.
             cv2.imshow('MediaPipe Hands', cv2.flip(image, 1))
-
             key_pressed =  cv2.waitKey(5)
-
             if key_pressed % 256 == 27:
                 break
-            elif key_pressed % 256 == 32:
-
+            if (time.time() - previousTime) > .5:
                 try:
                     handResults.multi_hand_landmarks[0]
                 except:
-                    print("no hand in frame")
+                    #this is just placeholder code
+                    noHand = True
                 else:
                     cv2.imshow('Capture', cv2.flip(image, 1))
                     #since mirroring is being wrong, I'm switching the handedness
@@ -193,35 +196,33 @@ with mp_pose.Pose(
                         landmarks = [[lm.x, lm.y, lm.z] for lm in handResults.multi_hand_landmarks[0].landmark],
                         world_landmarks = [[lm.x, lm.y, lm.z] for lm in handResults.multi_hand_world_landmarks[0].landmark]
                     )
-                    readPose(poseResults)
-                    fingersTouching = touching(hand)
-                    print(f"thumb is touching these fingers: {fingersTouching}")
-                    regularize(hand)
-                    userInput = input("Please enter yes if that was an example handshape, none to delete, or find to find a match: ")
-                    if(userInput == "find") :
-                        guess = find(hand)
-                        print(f"guess {guess}")
-                        word = input("Please type what word it was supposed to be or none to delete the picture: ")
-                        addNewWord(word, hand)
-                    elif(userInput == "yes"):
-                        word = input("ok, and what word was it, or none to delete: ")
-                        addNewWord((word, hand))
+                    if videoStarted:
+                        print("pic added")
+                        videoHands.append(hand)
+                        if len(previousHandPics) >1:
+                            dif1 = compareHands(previousHandPics[0], hand)
+                            dif2 = compareHands(previousHandPics[1], hand)
+                            if dif1 < .25 and dif2 <.25:
+                                print("you held still, I will stop capturing data")
+                            previousHandPics = [previousHandPics[len(previousHandPics)-1]]
+                        previousHandPics.append(hand)
+                        previousTime = time.time()
                     else:
-                        print("we won't store that photo")
-                    shouldContinue = input("Would you like to continue? Type yes or no: ")
-                    if(shouldContinue == "yes"):
-                        print("ok, take another picture")
-                    elif(shouldContinue == "no"):
-                        break
-                    else:
-                        print("That wasn't a yes or no, I'm going to go break now, sorry.")
+                        if len(previousHandPics) >1:
+                            dif1 = compareHands(previousHandPics[0], hand)
+                            dif2 = compareHands(previousHandPics[1], hand)
+                            if dif1 < .3 and dif2 <.3:
+                                print("you held still, I will start capturing data")
+                                videoStarted = True
+                                previousHandPics = []
+                            else:
+                                print("not still, I'm still waiting")
+                                previousHandPics = [previousHandPics[len(previousHandPics)-1]]
+                        previousHandPics.append(hand)
+                        previousTime = time.time()
 
 
-            with open('data.json', 'w') as file:
-                jsonThing = {
-                    key: [hand.toJson() for hand in handStorage[key]] for key in handStorage.keys()
-                }
-                json.dump(jsonThing, file, indent=2)
+
 
 
 cap.release()
