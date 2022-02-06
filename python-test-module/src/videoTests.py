@@ -3,6 +3,7 @@ import mediapipe as mp
 import json
 import Hand
 import time
+import os
 print("Hello world")
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
@@ -20,13 +21,23 @@ def readFile():
     }
 handStorage = readFile()
 previousHandPics = []
+handStopped = False
 videoStarted = False
 videoHands = []
+waitTime = .2
+cycleNum = 1
 
 # add wait key. window waits until user presses a key
 cv2.waitKey(0)
 # and finally destroy/close all open windows
 cv2.destroyAllWindows()
+
+def isSame(previousHandPics):
+    dif1 = compareHands(previousHandPics[0], hand)
+    dif2 = compareHands(previousHandPics[1], hand)
+    if dif1 < .05 and dif2 <.05:
+        return True
+
 
 # compares two hands and returns a number that is greater the farther they are from each other
 def compareHands(hand1, hand2):
@@ -179,7 +190,7 @@ with mp_pose.Pose(
             key_pressed =  cv2.waitKey(5)
             if key_pressed % 256 == 27:
                 break
-            if (time.time() - previousTime) > .5:
+            if (time.time() - previousTime) > waitTime:
                 try:
                     handResults.multi_hand_landmarks[0]
                 except:
@@ -197,29 +208,43 @@ with mp_pose.Pose(
                         world_landmarks = [[lm.x, lm.y, lm.z] for lm in handResults.multi_hand_world_landmarks[0].landmark]
                     )
                     if videoStarted:
-                        print("pic added")
                         videoHands.append(hand)
-                        if len(previousHandPics) >1:
-                            dif1 = compareHands(previousHandPics[0], hand)
-                            dif2 = compareHands(previousHandPics[1], hand)
-                            if dif1 < .25 and dif2 <.25:
-                                print("you held still, I will stop capturing data")
-                            previousHandPics = [previousHandPics[len(previousHandPics)-1]]
-                        previousHandPics.append(hand)
-                        previousTime = time.time()
-                    else:
-                        if len(previousHandPics) >1:
-                            dif1 = compareHands(previousHandPics[0], hand)
-                            dif2 = compareHands(previousHandPics[1], hand)
-                            if dif1 < .3 and dif2 <.3:
-                                print("you held still, I will start capturing data")
-                                videoStarted = True
-                                previousHandPics = []
-                            else:
-                                print("not still, I'm still waiting")
+                        fileName = "pics\\savedImage"+str(cycleNum)+".jpg"
+                        cv2.imwrite(fileName, image)
+                        print("pic added")
+                        if cycleNum % 2 == 0:
+                            if len(previousHandPics) >1:
+                                if isSame(previousHandPics):
+                                    print("you held still, I will stop capturing data")
+                                    break;
                                 previousHandPics = [previousHandPics[len(previousHandPics)-1]]
-                        previousHandPics.append(hand)
+                            previousHandPics.append(hand)
                         previousTime = time.time()
+                        cycleNum = cycleNum+1
+                    else:
+                        if handStopped:
+                            if len(previousHandPics) >1:
+                                if not isSame(previousHandPics):
+                                    print("you started moving, I will start capturing data")
+                                    videoHands.append(hand)
+                                    videoStarted = True
+                                    waitTime = .1
+                                    previousHandPics = []
+                                else:
+                                    print("still still, start moving")
+                                    previousHandPics = [previousHandPics[len(previousHandPics)-1]]
+                            previousHandPics.append(hand)
+                            previousTime = time.time()
+                        else:
+                            if len(previousHandPics) >1:
+                                if isSame(previousHandPics):
+                                    print("you held still, I will wait till you start")
+                                    handStopped = True
+                                else:
+                                    print("not still, I'm still waiting")
+                                previousHandPics = [previousHandPics[len(previousHandPics)-1]]
+                            previousHandPics.append(hand)
+                            previousTime = time.time()
 
 
 
