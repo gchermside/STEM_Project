@@ -59,3 +59,13 @@ link to useful info: https://google.github.io/mediapipe/solutions/hands
 #         mp_drawing.plot_landmarks(
 #             hand_world_landmarks, mp_hands.HAND_CONNECTIONS, azimuth=5)
 #
+
+0.1739 for j and j
+1.1969 for j and why
+0.090 for why and why
+0.14 for j and j
+2.544 for j and z
+1.47 for z and z
+0.2121 for z and z
+2.594 for z and where
+0.284 for where and where
