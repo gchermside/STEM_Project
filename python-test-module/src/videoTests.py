@@ -13,13 +13,13 @@ mp_pose = mp.solutions.pose
 
 #reads data.JSON into handStoarage
 def readFile():
-    with open('data.json', 'r') as file:
+    with open('videoData.json', 'r') as file:
         jsonReadableStorage = json.load(file)
 
-    return {
-        signName: [Hand.fromJson(handJson) for handJson in jsonReadableStorage[signName]] for signName in jsonReadableStorage.keys()
-    }
-handStorage = readFile()
+    return [
+        Hand.fromJson(handJson) for handJson in jsonReadableStorage
+    ]
+videoStorage = readFile()
 previousHandPics = []
 handStopped = False
 videoStarted = False
@@ -57,17 +57,30 @@ def compareHands(hand1, hand2):
         #     difTotal = difTotal + abs(hand1T[i]-hand2T[i])
     return difTotal
 
+def compareVideoHands(vh1, vh2):
+    if len(vh1) <=4 or len(vh2) <=4:
+        return -1
+    difTotal = 0
+    difTotal += compareHands(vh1[0], vh2[0])
+    middle1 = round(len(vh1)/2)
+    middle2 = round(len(vh2)/2)
+    difTotal += compareHands(vh1[middle1], vh2[middle2])
+    difTotal += compareHands(vh1[round(middle1/2)], vh2[round(middle2/2)])
+    difTotal += compareHands(vh1[round(len(vh1)/4*3)], vh2[round(len(vh2)/4*3)])
+    difTotal += compareHands(vh1[len(vh1)-1], vh2[len(vh2)-1])
+    return difTotal/5
+
 #function that addes a new hand picture to hand storage
 #it will either put it in a list of other hands for the same word
 # or if it is a unique word, it will make a new list only including that hand for that word.
-def addNewWord(word, hand):
-    if word != "none":
-        if word in handStorage:
-            handStorage[word].append(hand)
-        else:
-            handStorage[word] = [hand]
-    else:
-        print("ok, we won't store that photo for you")
+# def addNewWord(word, hand):
+#     if word != "none":
+#         if word in handStorage:
+#             handStorage[word].append(hand)
+#         else:
+#             handStorage[word] = [hand]
+#     else:
+#         print("ok, we won't store that photo for you")
 
 # this function points moves the hand so the wrist is at 0,0 and makes it a consistant
 # porportion(the length between point 0 and 1 will always be the same on hands)
@@ -87,17 +100,17 @@ def regularize(hand):
         lm[2] = lm[2] * mult
 
 #function that returns a list of the most similar hands in handStorage to the passed in hand object
-def find(hand):
-    words = [("no match", 150)]
-    for signName in handStorage.keys():
-        for possibleHand in handStorage[signName]:
-            closeness = compareHands(hand, possibleHand)
-            if closeness<150:
-                for i in range(0,len(words)):
-                    if closeness<words[i][1]:
-                        words.insert(i,(signName, closeness))
-                        break
-    return words
+# def find(hand):
+#     words = [("no match", 150)]
+#     for signName in handStorage.keys():
+#         for possibleHand in handStorage[signName]:
+#             closeness = compareHands(hand, possibleHand)
+#             if closeness<150:
+#                 for i in range(0,len(words)):
+#                     if closeness<words[i][1]:
+#                         words.insert(i,(signName, closeness))
+#                         break
+#     return words
 
 #function that takes in a hand object and return an array of which fingertips are touching
 #the thumb, from index to pinky
@@ -227,6 +240,8 @@ with mp_pose.Pose(
                                 if not isSame(previousHandPics):
                                     print("you started moving, I will start capturing data")
                                     videoHands.append(hand)
+                                    fileName = "pics\\savedImage0.jpg"
+                                    cv2.imwrite(fileName, image)
                                     videoStarted = True
                                     waitTime = .1
                                     previousHandPics = []
@@ -246,8 +261,17 @@ with mp_pose.Pose(
                             previousHandPics.append(hand)
                             previousTime = time.time()
 
+print("you survived till the end!")
+print(compareVideoHands(videoStorage, videoHands))
 
+
+with open('videoData.json', 'w') as file:
+    jsonThing = []
+    for hand in videoHands:
+        jsonThing.append(hand.toJson())
+    json.dump(jsonThing, file, indent=2)
 
 
 
 cap.release()
+#
