@@ -1,6 +1,8 @@
 import json
 
 def fromJson(json):
+    if json == 0:
+        return None
     return Hand(json["isRightHand"], json["landmarks"], json["world_landmarks"])
 
 class Hand:

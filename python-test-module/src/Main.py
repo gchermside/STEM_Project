@@ -2,6 +2,9 @@ import cv2
 import mediapipe as mp
 import json
 import Hand
+import Frame
+
+
 print("Hello world")
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
@@ -9,15 +12,31 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
 
+
+
+# reads data.JSON into frameStorage
+def readFrameFile():
+    with open('frames.json', 'r') as file:
+        jsonReadableStorage = json.load(file)
+    return {
+        signName: [Frame.fromJson(frameJson) for frameJson in jsonReadableStorage[signName]] for signName in jsonReadableStorage.keys()
+    }
+frameStorage = readFrameFile()
+
 #reads data.JSON into handStorage
 def readFile():
     with open('data.json', 'r') as file:
         jsonReadableStorage = json.load(file)
 
     return {
-        signName: [Hand.fromJson(handJson) for handJson in jsonReadableStorage[signName]] for signName in jsonReadableStorage.keys()
+        signName: [Hand.fromJson(frameJson) for frameJson in jsonReadableStorage[signName]] for signName in jsonReadableStorage.keys()
     }
 handStorage = readFile()
+
+
+
+
+
 
 # add wait key. window waits until user presses a key
 cv2.waitKey(0)
@@ -51,6 +70,33 @@ def addNewWord(word, hand):
             handStorage[word].append(hand)
         else:
             handStorage[word] = [hand]
+    else:
+        print("ok, we won't store that photo for you")
+
+
+#function that addes a new frame picture to hand storage
+#it will either put it in a list of other frames for the same word
+# or if it is a unique word, it will make a new list only including that frame for that word.
+def addNewFrame(word, hand1, hand2, pose):
+    if word != "none":
+        frame = Frame.Frame(hand1, hand2, pose)
+        needPose = input("Is the pose important? (yes or no): ")
+        if needPose == "yes":
+            need2hand = input("Does the sign have two hands? (yes or no)")
+            if need2hand == "yes":
+                frame = Frame.Frame(hand1, hand2, pose)
+            else:
+                frame = Frame.Frame(hand1, None, pose)
+        else:
+            need2hand = input("Does the sign have two hands? (yes or no)")
+            if need2hand == "yes":
+                frame = Frame.Frame(hand1, hand2, None)
+            else:
+                frame = Frame.Frame(hand1, None, None)
+        if word in frameStorage:
+            frameStorage[word].append(frame)
+        else:
+            frameStorage[word] = [frame]
     else:
         print("ok, we won't store that photo for you")
 
@@ -193,6 +239,17 @@ with mp_pose.Pose(
                         landmarks = [[lm.x, lm.y, lm.z] for lm in handResults.multi_hand_landmarks[0].landmark],
                         world_landmarks = [[lm.x, lm.y, lm.z] for lm in handResults.multi_hand_world_landmarks[0].landmark]
                     )
+                    hand2 = None
+                    try:
+                        handResults.multi_hand_landmarks[1]
+                    except:
+                        hand2 = None
+                    else:
+                        hand2 = Hand.Hand(
+                            isRightHand= not isRightHand,
+                            landmarks = [[lm.x, lm.y, lm.z] for lm in handResults.multi_hand_landmarks[1].landmark],
+                            world_landmarks = [[lm.x, lm.y, lm.z] for lm in handResults.multi_hand_world_landmarks[1].landmark]
+                        )
                     readPose(poseResults)
                     fingersTouching = touching(hand)
                     print(f"thumb is touching these fingers: {fingersTouching}")
@@ -203,9 +260,11 @@ with mp_pose.Pose(
                         print(f"guess {guess}")
                         word = input("Please type what word it was supposed to be or none to delete the picture: ")
                         addNewWord(word, hand)
+                        addNewFrame(word, hand, hand2, poseResults)
                     elif(userInput == "yes"):
                         word = input("ok, and what word was it, or none to delete: ")
                         addNewWord((word, hand))
+                        addNewFrame(word, hand, hand2, poseResults)
                     else:
                         print("we won't store that photo")
                     shouldContinue = input("Would you like to continue? Type yes or no: ")
@@ -216,12 +275,29 @@ with mp_pose.Pose(
                     else:
                         print("That wasn't a yes or no, I'm going to go break now, sorry.")
 
+                    with open('frames.json', 'w') as file:
+                        jsonThing = {
+                            key: [frame.toJson() for frame in frameStorage[key]] for key in frameStorage.keys()
+                        }
+                        json.dump(jsonThing, file, indent=2)
 
-            with open('data.json', 'w') as file:
-                jsonThing = {
-                    key: [hand.toJson() for hand in handStorage[key]] for key in handStorage.keys()
-                }
-                json.dump(jsonThing, file, indent=2)
+
+                    with open('data.json', 'w') as file:
+                        jsonThing = {
+                            key: [hand.toJson() for hand in handStorage[key]] for key in handStorage.keys()
+                        }
+                        json.dump(jsonThing, file, indent=2)
+
+            # for (word, hands) in handStorage.items():
+            #     print(hands)
+            #     for hand in hands:
+            #         frame = Frame.Frame(hand, None, None)
+            #         print(frame.toJson())
+            #         if word in frameStorage:
+            #             frameStorage[word].append(frame)
+            #         else:
+            #             frameStorage[word] = [frame]
+
 
 
 cap.release()
