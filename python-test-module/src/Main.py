@@ -1,3 +1,4 @@
+#imports
 import cv2
 import mediapipe as mp
 import json
@@ -6,6 +7,7 @@ import Frame
 
 
 print("Hello world")
+#makes media pipe work very useful
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -43,6 +45,10 @@ cv2.waitKey(0)
 # and finally destroy/close all open windows
 cv2.destroyAllWindows()
 
+
+
+
+
 # compares two hands and returns a number that is greater the farther they are from each other
 def compareHands(hand1, hand2):
     difTotal = 0
@@ -60,6 +66,14 @@ def compareHands(hand1, hand2):
         # for i in range(0, 4):
         #     difTotal = difTotal + abs(hand1T[i]-hand2T[i])
     return difTotal
+
+
+
+
+
+
+
+
 
 #function that addes a new hand picture to hand storage
 #it will either put it in a list of other hands for the same word
@@ -100,6 +114,9 @@ def addNewFrame(word, hand1, hand2, pose):
     else:
         print("ok, we won't store that photo for you")
 
+
+
+
 # this function points moves the hand so the wrist is at 0,0 and makes it a consistant
 # porportion(the length between point 0 and 1 will always be the same on hands)
 def regularize(hand):
@@ -117,6 +134,11 @@ def regularize(hand):
         lm[1] = lm[1] * mult
         lm[2] = lm[2] * mult
 
+
+
+
+
+
 #function that returns a list of the most similar hands in handStorage to the passed in hand object
 def find(hand):
     words = [("no match", 150)]
@@ -129,6 +151,9 @@ def find(hand):
                         words.insert(i,(signName, closeness))
                         break
     return words
+
+
+
 
 #function that takes in a hand object and return an array of which fingertips are touching
 #the thumb, from index to pinky
@@ -143,6 +168,8 @@ def touching(hand):
             if(pointDist<howClose):
                 fingers[i//4 - 2] = 1
     return fingers
+
+
 
 
 
