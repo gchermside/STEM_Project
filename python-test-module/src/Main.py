@@ -4,7 +4,7 @@ import mediapipe as mp
 import json
 import Hand
 import Frame
-
+import Pose
 
 print("Hello world")
 #makes media pipe work very useful
@@ -17,13 +17,14 @@ mp_pose = mp.solutions.pose
 
 
 # reads data.JSON into frameStorage
-def readFrameFile():
-    with open('frames.json', 'r') as file:
+def readFrameFile(file):
+    with open(file, 'r') as file:
         jsonReadableStorage = json.load(file)
     return {
         signName: [Frame.fromJson(frameJson) for frameJson in jsonReadableStorage[signName]] for signName in jsonReadableStorage.keys()
     }
-frameStorage = readFrameFile()
+frame1Storage = readFrameFile('frames1Hand.json')
+frame2Storage = readFrameFile('frames2Hand.json')
 
 #reads data.JSON into handStorage
 def readFile():
@@ -33,7 +34,7 @@ def readFile():
     return {
         signName: [Hand.fromJson(frameJson) for frameJson in jsonReadableStorage[signName]] for signName in jsonReadableStorage.keys()
     }
-handStorage = readFile()
+# handStorage = readFile()
 
 
 
@@ -78,39 +79,32 @@ def compareHands(hand1, hand2):
 #function that addes a new hand picture to hand storage
 #it will either put it in a list of other hands for the same word
 # or if it is a unique word, it will make a new list only including that hand for that word.
-def addNewWord(word, hand):
-    if word != "none":
-        if word in handStorage:
-            handStorage[word].append(hand)
-        else:
-            handStorage[word] = [hand]
-    else:
-        print("ok, we won't store that photo for you")
+# def addNewWord(word, hand):
+#     if word != "none":
+#         if word in handStorage:
+#             handStorage[word].append(hand)
+#         else:
+#             handStorage[word] = [hand]
+#     else:
+#         print("ok, we won't store that photo for you")
 
 
 #function that addes a new frame picture to hand storage
 #it will either put it in a list of other frames for the same word
 # or if it is a unique word, it will make a new list only including that frame for that word.
-def addNewFrame(word, hand1, hand2, pose):
+def addNewFrame(word, frame):
     if word != "none":
-        frame = Frame.Frame(hand1, hand2, pose)
-        needPose = input("Is the pose important? (yes or no): ")
-        if needPose == "yes":
-            need2hand = input("Does the sign have two hands? (yes or no)")
-            if need2hand == "yes":
-                frame = Frame.Frame(hand1, hand2, pose)
+        if frame.hand2 == None:
+            if word in frame1Storage:
+                frame1Storage[word].append(frame)
             else:
-                frame = Frame.Frame(hand1, None, pose)
+                frame1Storage[word] = [frame]
         else:
-            need2hand = input("Does the sign have two hands? (yes or no)")
-            if need2hand == "yes":
-                frame = Frame.Frame(hand1, hand2, None)
+            if word in frame2Storage:
+                frame2Storage[word].append(frame)
             else:
-                frame = Frame.Frame(hand1, None, None)
-        if word in frameStorage:
-            frameStorage[word].append(frame)
-        else:
-            frameStorage[word] = [frame]
+                frame2Storage[word] = [frame]
+
     else:
         print("ok, we won't store that photo for you")
 
@@ -140,17 +134,33 @@ def regularize(hand):
 
 
 #function that returns a list of the most similar hands in handStorage to the passed in hand object
-def find(hand):
+def find(frame):
     words = [("no match", 150)]
-    for signName in handStorage.keys():
-        for possibleHand in handStorage[signName]:
-            closeness = compareHands(hand, possibleHand)
-            if closeness<150:
-                for i in range(0,len(words)):
-                    if closeness<words[i][1]:
-                        words.insert(i,(signName, closeness))
-                        break
-    return words
+    if frame.pose != None:
+        #FIXME pose doesn't work
+        return words
+    else:
+        if frame.hand2 != None:
+            for signName in frame2Storage.keys():
+                for possibleHand in frame2Storage[signName]:
+                    closeness = compareHands(frame.hand1, possibleHand.hand1)
+                    closeness += compareHands(frame.hand2, possibleHand.hand2)
+                    if closeness<150:
+                        for i in range(0,len(words)):
+                            if closeness<words[i][1]:
+                                words.insert(i,(signName, closeness))
+                                break
+            return words
+        else:
+            for signName in frame1Storage.keys():
+                for possibleHand in frame1Storage[signName]:
+                    closeness = compareHands(frame.hand1, possibleHand.hand1)
+                    if closeness<150:
+                        for i in range(0,len(words)):
+                            if closeness<words[i][1]:
+                                words.insert(i,(signName, closeness))
+                                break
+            return words
 
 
 
@@ -169,8 +179,25 @@ def touching(hand):
                 fingers[i//4 - 2] = 1
     return fingers
 
+def writeFileFrame1():
+    with open('frames1Hand.json', 'w') as file1:
+        jsonFile1 = {}
+        for key in frame1Storage.keys():
+            keyList1 = []
+            for frame in frame1Storage[key]:
+                if frame.hand2 is None:
+                    keyList1.append(frame.toJson())
+            if len(keyList1) > 1:
+                jsonFile1[key] = keyList1
+        json.dump(jsonFile1, file1, indent=2)
 
 
+def writeFileFrame2():
+    with open('frames2Hand.json', 'w') as file:
+        jsonThing = {
+            key: [frame.toJson() for frame in frame2Storage[key]] for key in frame2Storage.keys()
+        }
+        json.dump(jsonThing, file, indent=2)
 
 
 #this is a function where I'm plauing around with pose
@@ -185,9 +212,6 @@ def readPose(poseResults):
     #         poseResults.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_INDEX].y,
     #         poseResults.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_INDEX].z]
     disRHandToFace = [abs(nose[0]-right_index[0]), abs(nose[1]-right_index[1]), abs(nose[2]-right_index[2])]
-    print(nose)
-    print(right_index)
-    print(disRHandToFace)
     if(disRHandToFace[0]>.25 or disRHandToFace[1]>.25):
         print("your hand is far from your face")
     else:
@@ -236,11 +260,11 @@ with mp_pose.Pose(
                         mp_drawing_styles.get_default_hand_connections_style())
 
             # draws on pose lines
-            mp_drawing.draw_landmarks(
-                image,
-                poseResults.pose_landmarks,
-                mp_pose.POSE_CONNECTIONS,
-                landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+            # mp_drawing.draw_landmarks(
+            #     image,
+            #     poseResults.pose_landmarks,
+            #     mp_pose.POSE_CONNECTIONS,
+            #     landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
 
             # Flip the image horizontally for a selfie-view display.
             cv2.imshow('MediaPipe Hands', cv2.flip(image, 1))
@@ -277,23 +301,27 @@ with mp_pose.Pose(
                             landmarks = [[lm.x, lm.y, lm.z] for lm in handResults.multi_hand_landmarks[1].landmark],
                             world_landmarks = [[lm.x, lm.y, lm.z] for lm in handResults.multi_hand_world_landmarks[1].landmark]
                         )
-                    readPose(poseResults)
+                    poseNeeded = input("Please enter yes if the pose in important or no if it is not: ")
+                    realFrame = Frame.Frame(hand, hand2, None) #FIXME more pose being set to None
+                    if poseNeeded == "yes":
+                        realFrame = Frame.Frame(hand, hand2, Pose.Pose(poseResults))
+                    # readPose(poseResults)
                     fingersTouching = touching(hand)
                     print(f"thumb is touching these fingers: {fingersTouching}")
                     regularize(hand)
                     userInput = input("Please enter yes if that was an example handshape, none to delete, or find to find a match: ")
                     if(userInput == "find") :
-                        guess = find(hand)
+                        guess = find(realFrame)
                         print(f"guess {guess}")
                         word = input("Please type what word it was supposed to be or none to delete the picture: ")
-                        addNewWord(word, hand)
-                        addNewFrame(word, hand, hand2, poseResults)
+                        addNewFrame(word, realFrame)
                     elif(userInput == "yes"):
                         word = input("ok, and what word was it, or none to delete: ")
-                        addNewWord((word, hand))
-                        addNewFrame(word, hand, hand2, poseResults)
+                        addNewFrame(word, realFrame)
                     else:
                         print("we won't store that photo")
+                    writeFileFrame2()
+                    writeFileFrame1()
                     shouldContinue = input("Would you like to continue? Type yes or no: ")
                     if(shouldContinue == "yes"):
                         print("ok, take another picture")
@@ -302,18 +330,12 @@ with mp_pose.Pose(
                     else:
                         print("That wasn't a yes or no, I'm going to go break now, sorry.")
 
-                    with open('frames.json', 'w') as file:
-                        jsonThing = {
-                            key: [frame.toJson() for frame in frameStorage[key]] for key in frameStorage.keys()
-                        }
-                        json.dump(jsonThing, file, indent=2)
 
-
-                    with open('data.json', 'w') as file:
-                        jsonThing = {
-                            key: [hand.toJson() for hand in handStorage[key]] for key in handStorage.keys()
-                        }
-                        json.dump(jsonThing, file, indent=2)
+# with open('data.json', 'w') as file:
+#     jsonThing = {
+#         key: [hand.toJson() for hand in handStorage[key]] for key in handStorage.keys()
+#     }
+#     json.dump(jsonThing, file, indent=2)
 
             # for (word, hands) in handStorage.items():
             #     print(hands)
