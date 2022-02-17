@@ -34,8 +34,13 @@ def readFile():
     return {
         signName: [Hand.fromJson(frameJson) for frameJson in jsonReadableStorage[signName]] for signName in jsonReadableStorage.keys()
     }
-# handStorage = readFile()
 
+#this in incase the data in the file got overridden
+# handStorage = readFile()
+#
+# frame1Storage = {
+#     signName: [Frame.Frame(hand, None, None) for hand in handStorage[signName]] for signName in handStorage.keys()
+# }
 
 
 
@@ -138,7 +143,27 @@ def find(frame):
     words = [("no match", 150)]
     if frame.pose != None:
         #FIXME pose doesn't work
-        return words
+        if frame.hand2 != None:
+            for signName in frame2Storage.keys():
+                for possibleHand in frame2Storage[signName]:
+                    closeness = compareHands(frame.hand1, possibleHand.hand1)
+                    closeness += compareHands(frame.hand2, possibleHand.hand2)
+                    if closeness<150:
+                        for i in range(0,len(words)):
+                            if closeness<words[i][1]:
+                                words.insert(i,(signName, closeness))
+                                break
+            return words
+        else:
+            for signName in frame1Storage.keys():
+                for possibleHand in frame1Storage[signName]:
+                    closeness = compareHands(frame.hand1, possibleHand.hand1)
+                    if closeness<150:
+                        for i in range(0,len(words)):
+                            if closeness<words[i][1]:
+                                words.insert(i,(signName, closeness))
+                                break
+            return words
     else:
         if frame.hand2 != None:
             for signName in frame2Storage.keys():
@@ -187,7 +212,9 @@ def writeFileFrame1():
             for frame in frame1Storage[key]:
                 if frame.hand2 is None:
                     keyList1.append(frame.toJson())
-            if len(keyList1) > 1:
+                else:
+                    print("error  writing to file, frame storage1 has hand2")
+            if len(keyList1) >= 1:
                 jsonFile1[key] = keyList1
         json.dump(jsonFile1, file1, indent=2)
 
@@ -302,10 +329,10 @@ with mp_pose.Pose(
                             world_landmarks = [[lm.x, lm.y, lm.z] for lm in handResults.multi_hand_world_landmarks[1].landmark]
                         )
                     poseNeeded = input("Please enter yes if the pose in important or no if it is not: ")
-                    realFrame = Frame.Frame(hand, hand2, None) #FIXME more pose being set to None
+                    realFrame = Frame.Frame(hand, hand2, None)
                     if poseNeeded == "yes":
-                        realFrame = Frame.Frame(hand, hand2, Pose.Pose(poseResults))
-                    # readPose(poseResults)
+                        realFrame = Frame.Frame(hand, hand2, Pose.Pose([[lm.x, lm.y, lm.z] for lm in poseResults.pose_landmarks.landmark]))
+                    readPose(poseResults)
                     fingersTouching = touching(hand)
                     print(f"thumb is touching these fingers: {fingersTouching}")
                     regularize(hand)

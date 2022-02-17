@@ -1,9 +1,13 @@
 import Hand
+import Pose
+
 
 def fromJson(json):
     if json["pose"] == 0:
         return Frame(Hand.fromJson(json["hand1"]), Hand.fromJson(json["hand2"]), None)
-    return Frame(Hand.fromJson(json["hand1"]), Hand.fromJson(json["hand2"]), None) #FIXME: pose doesn't work
+    else:
+        print(Pose.fromJson(json["pose"]))
+        return Frame(Hand.fromJson(json["hand1"]), Hand.fromJson(json["hand2"]), Pose.fromJson(json["pose"]))
 
 class Frame:
     def __init__(self, hand1, hand2, pose):
@@ -24,7 +28,7 @@ class Frame:
                 return {
                     "hand1": self.hand1.toJson(),
                     "hand2": 0,
-                    "pose": -1, ##FIXME: should break code
+                    "pose": self.pose.toJson(),
                 }
         else:
             if self.pose == None:
@@ -37,7 +41,7 @@ class Frame:
                 return {
                     "hand1": self.hand1.toJson(),
                     "hand2": self.hand2.toJson(),
-                    "pose": -1, #FIXME: should break code
+                    "pose": self.pose.toJson(),
                 }
 
 
