@@ -3,6 +3,7 @@ import mediapipe as mp
 import json
 import Hand
 import time
+import Main
 import os
 print("Hello world")
 mp_hands = mp.solutions.hands
@@ -12,14 +13,14 @@ mp_pose = mp.solutions.pose
 
 
 #reads data.JSON into handStoarage
-def readFile():
+def readVideoFile():
     with open('videoData.json', 'r') as file:
         jsonReadableStorage = json.load(file)
 
     return [
         Hand.fromJson(handJson) for handJson in jsonReadableStorage
     ]
-videoStorage = readFile()
+videoStorage = readVideoFile()
 previousHandPics = []
 handStopped = False
 videoStarted = False

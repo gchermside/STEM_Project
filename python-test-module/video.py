@@ -74,26 +74,6 @@ def compareHands(hand1, hand2):
     return difTotal
 
 
-
-
-
-
-
-
-
-#function that addes a new hand picture to hand storage
-#it will either put it in a list of other hands for the same word
-# or if it is a unique word, it will make a new list only including that hand for that word.
-# def addNewWord(word, hand):
-#     if word != "none":
-#         if word in handStorage:
-#             handStorage[word].append(hand)
-#         else:
-#             handStorage[word] = [hand]
-#     else:
-#         print("ok, we won't store that photo for you")
-
-
 #function that addes a new frame picture to hand storage
 #it will either put it in a list of other frames for the same word
 # or if it is a unique word, it will make a new list only including that frame for that word.
@@ -254,7 +234,7 @@ cap = cv2.VideoCapture(0)
 with mp_pose.Pose(
         min_detection_confidence=0.5,
         min_tracking_confidence=0.5) as pose:
-#starts using hand
+    #starts using hand
     with mp_hands.Hands(
             model_complexity=0,
             min_detection_confidence=0.5,
@@ -317,7 +297,6 @@ with mp_pose.Pose(
                         landmarks = [[lm.x, lm.y, lm.z] for lm in handResults.multi_hand_landmarks[0].landmark],
                         world_landmarks = [[lm.x, lm.y, lm.z] for lm in handResults.multi_hand_world_landmarks[0].landmark]
                     )
-                    regularize(hand)
                     hand2 = None
                     try:
                         handResults.multi_hand_landmarks[1]
@@ -329,7 +308,6 @@ with mp_pose.Pose(
                             landmarks = [[lm.x, lm.y, lm.z] for lm in handResults.multi_hand_landmarks[1].landmark],
                             world_landmarks = [[lm.x, lm.y, lm.z] for lm in handResults.multi_hand_world_landmarks[1].landmark]
                         )
-                        regularize(hand2)
                     poseNeeded = input("Please enter yes if the pose in important or no if it is not: ")
                     realFrame = Frame.Frame(hand, hand2, None)
                     if poseNeeded == "yes":
@@ -359,22 +337,6 @@ with mp_pose.Pose(
                     else:
                         print("That wasn't a yes or no, I'm going to go break now, sorry.")
 
-
-# with open('data.json', 'w') as file:
-#     jsonThing = {
-#         key: [hand.toJson() for hand in handStorage[key]] for key in handStorage.keys()
-#     }
-#     json.dump(jsonThing, file, indent=2)
-
-            # for (word, hands) in handStorage.items():
-            #     print(hands)
-            #     for hand in hands:
-            #         frame = Frame.Frame(hand, None, None)
-            #         print(frame.toJson())
-            #         if word in frameStorage:
-            #             frameStorage[word].append(frame)
-            #         else:
-            #             frameStorage[word] = [frame]
 
 
 
