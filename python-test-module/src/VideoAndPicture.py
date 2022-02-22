@@ -179,9 +179,12 @@ if videoOrPicture == "v":
                                 previousFrames.append(currentFrame)
                                 previousTime = time.time()
     print("you made it!")
-    signName = input("Please enter the word you signed, or None to delete it: ")
+    shouldFind = input("Please enter if you would like to find similar signs to this (yes or no): ")
+    if shouldFind == "Yes" or shouldFind == "yes":
+        listOfSimilarWords = functions.findVideo(currentVideo, videoStorage)
+        print(f"Possible word matches are: {listOfSimilarWords}")
+    signName = input("Type the sign name or none to delete ")
     functions.addNewThing(signName, currentVideo, videoStorage)
-    print(videoStorage)
     with open('video1Hand.json', 'w') as file:
         jsonThing = {}
         for key, videos in videoStorage.items():

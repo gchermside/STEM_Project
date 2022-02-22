@@ -5,6 +5,7 @@ import json
 import Hand
 import Frame
 import Pose
+import functions
 
 print("Hello world")
 #makes media pipe work very useful
