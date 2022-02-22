@@ -137,4 +137,3 @@ def findVideo(video, storage):
                         words.insert(i,(signName, closeness))
                         break
     return words
-s
