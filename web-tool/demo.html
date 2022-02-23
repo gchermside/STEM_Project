@@ -13,6 +13,18 @@
     <div class="container">
       <video class="input_video"></video>
       <canvas class="output_canvas" width="1280px" height="720px"></canvas>
+      <div class="controls">
+        <div class="title">Controls</div>
+        <div>
+          <input type="radio" name="format" id="snapshot" value="snapshot" checked>
+          <label for="snapshot">Snapshot</label>
+        </div>
+        <div>
+          <input type="radio" name="format" id="video" value="video">
+          <label for="video">Video</label>
+        </div>
+        <div class="instructions notReady">Space to Record</div>
+      </div>
     </div>
     <script type="text/javascript" src="demo.js"></script>
   </body>
