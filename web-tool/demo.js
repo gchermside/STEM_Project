@@ -1,17 +1,30 @@
 // ==== Constants ====
-const videoSize = {width: 1280, height: 720}; // must match the size in the HTML
 const instructionsElem = document.getElementsByClassName('instructions')[0];
+const savedElem = document.getElementsByClassName('saving')[0];
 const videoElem = document.getElementsByClassName('input_video')[0];
 const canvasElem = document.getElementsByClassName('output_canvas')[0];
 const canvasCtx = canvasElem.getContext('2d');
 
 
 // ==== Global Variables ====
+let s3; // gets set by initializeAWS()
 let readyToCapture = false;
 let saveNextFrame = false;
 
 
 // ==== Functions ====
+
+/*
+ * This needs to be called before we begin, it initializes access to AWS for
+ * writing files and sets the "s3" global variable.
+ */
+function initializeAWS() {
+    AWS.config.update({region: "us-east-1"});
+    AWS.config.credentials = new AWS.CognitoIdentityCredentials(
+        {IdentityPoolId: passwords.identityPoolId}
+    );
+    s3 = new AWS.S3();
+}
 
 /*
  * Function called when the user presses a key (while the browser is in the forefront).
@@ -23,6 +36,7 @@ let saveNextFrame = false;
 function onKeypress(event) {
     if (event.code === 'Space') {
         saveNextFrame = true;
+        event.preventDefault(); // don't actually type a space.
     }
 }
 
@@ -45,10 +59,42 @@ function setReadyToCapture(isReady) {
 
 
 /*
+ * Call this function to make the UI temporarily something to the user
+ * to indicate that a save was successful.
+ */
+function showUserSaveHappened() {
+    savedElem.classList.add("showing");
+    setTimeout(function() {
+        savedElem.classList.remove("showing");
+    }, 1000)
+}
+
+
+/*
  * Function called after a single frame has been taken.
  */
 function saveSingleFrame(handResults) {
-    console.log(handResults.multiHandLandmarks);
+    let dataAsAString = JSON.stringify(handResults.multiHandLandmarks);
+    const randomId = getRandomId();
+    const uploadInstructions = {
+        Bucket: 'test-bucket-for-file-upload',
+        Key: `uploads/${randomId}/landmarks.json`,
+        Body: dataAsAString
+    };
+    s3.upload(uploadInstructions, function(err) {
+        if (err) {
+            throw err;
+        }
+        showUserSaveHappened();
+    });
+}
+
+
+/*
+ * This function returns a random number from 1 through 1 million.
+ */
+function getRandomId() {
+    return Math.ceil(Math.random() * 1000000);
 }
 
 
@@ -92,8 +138,8 @@ function startRunningCamera() {
         onFrame: async () => {
             await hands.send({image: videoElem});
         },
-        width: videoSize.width,
-        height: videoSize.height
+        width: 1280,
+        height: 720,
     });
     camera.start();
 
@@ -103,5 +149,5 @@ function startRunningCamera() {
 
 
 // ==== MAIN FUNCTION ====
-
+initializeAWS()
 startRunningCamera()
