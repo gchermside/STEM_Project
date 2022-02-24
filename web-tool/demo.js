@@ -73,35 +73,83 @@ function showUserSaveHappened() {
 /*
  * Function called after a single frame has been taken.
  */
-function saveSingleFrame(handResults) {
-    let dataAsAString = JSON.stringify(handResults.multiHandLandmarks);
+function saveSingleFrame(handResults, imageAsBlob) {
+    // --- Select a random ID to use ---
     const randomId = getRandomId();
-    const uploadInstructions = {
+    console.log(`saving to id ${randomId}`);
+
+    // --- Write the landmarks ---
+    const dataAsAString = JSON.stringify(handResults.multiHandLandmarks);
+    const uploadInstructionsForLandmark = {
         Bucket: 'test-bucket-for-file-upload',
         Key: `uploads/${randomId}/landmarks.json`,
+        ContentType: "application/json",
         Body: dataAsAString
     };
-    s3.upload(uploadInstructions, function(err) {
+    s3.upload(uploadInstructionsForLandmark, function(err) {
         if (err) {
             throw err;
         }
-        showUserSaveHappened();
+        console.log("finished saving landmark");
     });
+
+    // --- Write the image ---
+    console.log("about to save image");
+    const uploadInstructionsForImage = {
+        Bucket: 'test-bucket-for-file-upload',
+        Key: `uploads/${randomId}/image.jpeg`,
+        ContentType: "image/jpeg",
+        Body: imageAsBlob
+    };
+    s3.upload(uploadInstructionsForImage, function(err) {
+        if (err) {
+            throw err;
+        }
+        console.log("finished saving image");
+    });
+
+    // --- Perform animation ---
+    // NOTE: the save hasn't happened yet, it is still going on. So we're lying to the user.
+    showUserSaveHappened();
 }
 
 
 /*
- * This function returns a random number from 1 through 1 million.
+ * This function returns the canvas image as a blob. It's rather
+ * complicated and it's not supposed to very obvious how it works.
+ */
+function canvasAsBlob(canvasElem) {
+    const imageAsURL = canvasElem.toDataURL();
+    const binary = atob(imageAsURL.split(',')[1]);
+    const array = [];
+    for(let i = 0; i < binary.length; i++) {
+        array.push(binary.charCodeAt(i));
+    }
+    return new Blob([new Uint8Array(array)], {type: 'image/jpeg'});
+}
+
+/*
+ * This function returns a random number from 1 through 10 million.
  */
 function getRandomId() {
-    return Math.ceil(Math.random() * 1000000);
+    return Math.ceil(Math.random() * 10000000);
 }
 
 
 function onHandsResults(handResults) {
+    // --- Draw the image onto the canvas ---
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElem.width, canvasElem.height);
     canvasCtx.drawImage(handResults.image, 0, 0, canvasElem.width, canvasElem.height);
+
+    // --- If we plan to save it, capture the image before we draw landmarks ---
+    let imageAsBlob;
+    if (saveNextFrame) {
+        // Since we're going to save it, we'd better grab a copy before drawing on it.
+        imageAsBlob = canvasAsBlob(canvasElem);
+    }
+
+    // --- If we have landmarks, draw them on the canvas ---
     if (handResults.multiHandLandmarks && handResults.multiHandLandmarks.length > 0) {
         for (const landmarks of handResults.multiHandLandmarks) {
             drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {color: '#00FF00', lineWidth: 5});
@@ -112,9 +160,11 @@ function onHandsResults(handResults) {
         setReadyToCapture(false)
     }
     canvasCtx.restore();
+
+    // --- If we need to, go ahead and save the data ---
     if (saveNextFrame) {
         saveNextFrame = false;
-        saveSingleFrame(handResults);
+        saveSingleFrame(handResults, imageAsBlob);
     }
 }
 
