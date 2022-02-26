@@ -45,3 +45,8 @@ class Frame:
                 }
 
 
+class videoFrame(Frame):
+    def __init__(self, hand1, hand2, pose, movement):
+        self.movement = movement
+        # invoking the __init__ of the parent class
+        Frame.__init__(self, hand1, hand2, pose)

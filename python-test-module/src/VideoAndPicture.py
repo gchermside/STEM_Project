@@ -15,7 +15,7 @@ mp_pose = mp.solutions.pose
 
 
 
-def buildFrame(handResults):
+def buildFrame(handResults, previousMovement):
     isRightHand = True
     if(handResults.multi_handedness[0] == "Right"):
         isRightHand = False
@@ -37,7 +37,11 @@ def buildFrame(handResults):
             world_landmarks = [[lm.x, lm.y, lm.z] for lm in handResults.multi_hand_world_landmarks[1].landmark]
         )
         functions.regularize(hand2)
-    realFrame = Frame.Frame(hand1, hand2, None)
+    movement = []
+    movement.append(hand1.landmarks[0][0] - previousMovement[0])
+    movement.append(hand1.landmarks[0][1] - previousMovement[1])
+    movement.append(hand1.landmarks[0][2] - previousMovement[2])
+    realFrame = Frame.videoFrame(hand1.landmarks, hand2, movement)
     return realFrame
 
 
@@ -52,7 +56,9 @@ def readVideoFile(file):
 def isSame(previousFrames, frame):
     dif1 = functions.compareHands(previousFrames[0].hand1, frame.hand1)
     dif2 = functions.compareHands(previousFrames[1].hand1, frame.hand1)
-    if dif1 < 15 and dif2 < 15:
+    difMovment = previousFrames[1].movement[0] + previousFrames[1].movement[1] + previousFrames[1].movement[2]
+    difMovment += frame.movement[0] + frame.movement[1] + frame.movement[2]
+    if dif1 < 15 and dif2 < 15 and difMovment <5:
         return True
     return False
 
@@ -85,6 +91,7 @@ if videoOrPicture == "v":
     currentVideo = []
     waitTime = .2
     cycleNum = 1
+    previousMovement = None
     cap = cv2.VideoCapture(0)
 
     #starts using pose
@@ -137,7 +144,8 @@ if videoOrPicture == "v":
                     else:
                         cv2.imshow('Capture', cv2.flip(image, 1))
                         #since mirroring is being wrong, I'm switching the handedness
-                        currentFrame = buildFrame(handResults)
+                        currentFrame = buildFrame(handResults, previousMovement)
+                        previousMovement = currentFrame.movment
                         if videoStarted:
                             currentVideo.append(currentFrame)
                             fileName = "pics\\savedImage"+str(cycleNum)+".jpg"
