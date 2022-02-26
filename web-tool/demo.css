@@ -1,0 +1,58 @@
+.input_video {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.output_canvas {
+    width: 100%;
+    display: block;
+    position: relative;
+    left: 0;
+    top: 0;
+}
+
+.controls {
+    position: sticky;
+    display: inline-block;
+    left: 20px;
+    bottom: 20px;
+    background-color: #FFFFFF;
+    padding: 5px;
+    border: 2px solid #060606;
+    border-radius: 15px;
+    height: auto;
+    width: auto;
+}
+
+.controls .title {
+    text-align: center;
+}
+.instructions {
+    text-align: center;
+}
+.instructions.notReady {
+    visibility: hidden;
+}
+
+.saving {
+    position: absolute;
+    display: inline-block;
+    top:50%;
+    left: 50%;
+    margin: auto;
+    background-color: #FFFFFF;
+    padding: 15px;
+    border: 2px solid #060606;
+    border-radius: 15px;
+    height: auto;
+    width: auto;
+    font-size: x-large;
+    visibility: hidden;
+}
+.saving.showing {
+    visibility: visible;
+}
