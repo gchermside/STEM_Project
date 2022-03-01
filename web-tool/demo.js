@@ -9,7 +9,11 @@ const canvasCtx = canvasElem.getContext('2d');
 // ==== Global Variables ====
 let s3; // gets set by initializeAWS()
 let readyToCapture = false;
-let saveNextFrame = false;
+let captureMode = "snapshot"; // either "snapshot" or "video"
+let saveNextFrame = false; // used in snapshot mode
+let recordingVideo = false; // used in video mode
+let landmarkList; // when recordingVideo is true, this is the list of landmarks for each frame
+let recorder; // when recordingVideo is true, this is the recorder object
 
 
 // ==== Functions ====
@@ -26,6 +30,20 @@ function initializeAWS() {
     s3 = new AWS.S3();
 }
 
+
+/*
+ * This needs to be called before we begin. It initializes controls on the page.
+ */
+function initializeControls() {
+    document.getElementById("snapshot").onclick = function(event) {
+        captureMode = "snapshot";
+    };
+    document.getElementById("video").onclick = function() {
+        captureMode = "video";
+    }
+}
+
+
 /*
  * Function called when the user presses a key (while the browser is in the forefront).
  *
@@ -34,9 +52,42 @@ function initializeAWS() {
  * @param event the system event that was generated
  */
 function onKeypress(event) {
-    if (event.code === 'Space') {
+    if (readyToCapture && captureMode === "snapshot" && event.code === 'Space') {
         saveNextFrame = true;
         event.preventDefault(); // don't actually type a space.
+    }
+    if (recordingVideo && event.code === 'Space') {
+        // while recording video, don't let holding down the space cause problems
+        event.preventDefault(); // don't react as if a space was typed.
+    }
+}
+
+
+/*
+ * Function that is called when a key goes down. Used to watch for the space
+ * key going down to begin recording video.
+ */
+function onKeydown(event) {
+    if (readyToCapture && captureMode === "video" && !recordingVideo && event.code === 'Space') {
+        landmarkList = [];
+        recorder = new MediaRecorder(canvasElem.captureStream());
+        recorder.ondataavailable = onVideoDataAvailable;
+        recorder.start();
+        recordingVideo = true;
+        event.preventDefault(); // don't actually process it as a space being typed.
+    }
+}
+
+
+/*
+ * Function that is called when a key goes down. Used to watch for the space
+ * key going down to begin recording video.
+ */
+function onKeyup(event) {
+    if (recordingVideo && event.code === 'Space') {
+        recordingVideo = false;
+        recorder.stop();
+        event.preventDefault(); // don't actually process it as a space being typed.
     }
 }
 
@@ -128,6 +179,58 @@ function canvasAsBlob(canvasElem) {
     return new Blob([new Uint8Array(array)], {type: 'image/jpeg'});
 }
 
+
+function onVideoDataAvailable(blobEvent) {
+    saveVideo(landmarkList, blobEvent.data);
+    landmarkList = null; // we saved it, so we don't need this data anymore
+    recorder = null; // we saved it, so we don't need this data anymore
+}
+
+
+/*
+ * Function called after a single frame has been taken.
+ */
+function saveVideo(landmarkList, videoAsBlob) {
+    // --- Select a random ID to use ---
+    const randomId = getRandomId();
+    console.log(`saving to id ${randomId}`);
+
+    // --- Write the landmarkList ---
+    const dataAsAString = JSON.stringify(landmarkList);
+    const uploadInstructionsForLandmarkList = {
+        Bucket: 'test-bucket-for-file-upload',
+        Key: `uploads/${randomId}/landmarks.json`,
+        ContentType: "application/json",
+        Body: dataAsAString
+    };
+    s3.upload(uploadInstructionsForLandmarkList, function(err) {
+        if (err) {
+            throw err;
+        }
+        console.log("finished saving landmark");
+    });
+
+    // --- Write the video ---
+    console.log("about to save video");
+    const uploadInstructionsForVideo = {
+        Bucket: 'test-bucket-for-file-upload',
+        Key: `uploads/${randomId}/video.webm`,
+        ContentType: "video/webm",
+        Body: videoAsBlob
+    };
+    s3.upload(uploadInstructionsForVideo, function(err) {
+        if (err) {
+            throw err;
+        }
+        console.log("finished saving video");
+    });
+
+    // --- Perform animation ---
+    // NOTE: the save hasn't happened yet, it is still going on. So we're lying to the user.
+    showUserSaveHappened();
+}
+
+
 /*
  * This function returns a random number from 1 through 10 million.
  */
@@ -166,6 +269,9 @@ function onHandsResults(handResults) {
         saveNextFrame = false;
         saveSingleFrame(handResults, imageAsBlob);
     }
+    if (recordingVideo) {
+        landmarkList.push(handResults.multiHandLandmarks);
+    }
 }
 
 
@@ -195,9 +301,12 @@ function startRunningCamera() {
 
     // --- Begin listening for space key ---
     document.addEventListener('keypress', onKeypress);
+    document.addEventListener("keydown", onKeydown);
+    document.addEventListener("keyup", onKeyup);
 }
 
 
 // ==== MAIN FUNCTION ====
 initializeAWS()
+initializeControls()
 startRunningCamera()
