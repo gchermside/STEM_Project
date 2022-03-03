@@ -132,9 +132,9 @@ function saveSingleFrame(handResults, imageAsBlob) {
     // --- Write the landmarks ---
     const dataAsAString = JSON.stringify(handResults.multiHandLandmarks);
     const uploadInstructionsForLandmark = {
-        Bucket: 'test-bucket-for-file-upload',
+        Bucket: 'asl-dictionary-uploads',
         Key: `uploads/${randomId}/landmarks.json`,
-        ContentType: "application/json",
+        ContentType: "application/json", //subtly important
         Body: dataAsAString
     };
     s3.upload(uploadInstructionsForLandmark, function(err) {
@@ -147,7 +147,7 @@ function saveSingleFrame(handResults, imageAsBlob) {
     // --- Write the image ---
     console.log("about to save image");
     const uploadInstructionsForImage = {
-        Bucket: 'test-bucket-for-file-upload',
+        Bucket: 'asl-dictionary-uploads',
         Key: `uploads/${randomId}/image.jpeg`,
         ContentType: "image/jpeg",
         Body: imageAsBlob
@@ -198,7 +198,7 @@ function saveVideo(landmarkList, videoAsBlob) {
     // --- Write the landmarkList ---
     const dataAsAString = JSON.stringify(landmarkList);
     const uploadInstructionsForLandmarkList = {
-        Bucket: 'test-bucket-for-file-upload',
+        Bucket: 'asl-dictionary-uploads',
         Key: `uploads/${randomId}/landmarks.json`,
         ContentType: "application/json",
         Body: dataAsAString
@@ -213,7 +213,7 @@ function saveVideo(landmarkList, videoAsBlob) {
     // --- Write the video ---
     console.log("about to save video");
     const uploadInstructionsForVideo = {
-        Bucket: 'test-bucket-for-file-upload',
+        Bucket: 'asl-dictionary-uploads',
         Key: `uploads/${randomId}/video.webm`,
         ContentType: "video/webm",
         Body: videoAsBlob
@@ -235,7 +235,9 @@ function saveVideo(landmarkList, videoAsBlob) {
  * This function returns a random number from 1 through 10 million.
  */
 function getRandomId() {
-    return Math.ceil(Math.random() * 10000000);
+    const d = new Date();
+    const date = d.getFullYear()+"-"+d.getMonth()+"-"+d.getDay()+"-"+d.getHours()+"-"+d.getMinutes()
+    return date+"-"+Math.ceil(Math.random() * 10000000);
 }
 
 

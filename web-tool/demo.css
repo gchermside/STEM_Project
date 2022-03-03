@@ -8,7 +8,7 @@
 }
 
 .output_canvas {
-    width: 100%;
+    width: 100%; /*fills container*/
     display: block;
     position: relative;
     left: 0;
@@ -39,7 +39,7 @@
 }
 
 .saving {
-    position: absolute;
+    position: absolute; /*maybe should be relative if we want side bar */
     display: inline-block;
     top:50%;
     left: 50%;
