@@ -28,7 +28,33 @@
           <label for="video">Video</label>
         </div>
         <div class="instructions notReady">Space to Record</div>
+        <div class="infoBox">
+          <label>Enter your Name</label>
+          <br>
+          <input type="text" id="name">
+          <br>
+          <label>Enter the Sign Name</label>
+          <br>
+          <input type="text" id="sign">
+          <div>
+            <input type="radio" name="handedness" id="right" value="right" checked>
+            <label for="right">Right Handed</label>
+          </div>
+          <div>
+            <input type="radio" name="handedness" id="left" value="left">
+            <label for="left">Left Handed</label>
+          </div>
+          <div id="enterNameAndSign" class="hidden">Must Enter a Name and Sign Name</div>
+        </div>
       </div>
+
+      <!--      <form id="form">-->
+<!--        Enter your name:<br> <input type="text" name="name" id="name">-->
+<!--        <br>-->
+<!--        Enter the sign name:<br> <input type="text" name="sign" id="sign">-->
+<!--        <br><br>-->
+<!--&lt;!&ndash;        <input type="button" onclick="submitInfo()" value="Submit Info">&ndash;&gt;-->
+<!--      </form>-->
       <div class="saving">Saving</div>
     </div>
     <script type="text/javascript" src="passwords.js"></script>

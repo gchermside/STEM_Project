@@ -2,14 +2,18 @@
 const instructionsElem = document.getElementsByClassName('instructions')[0];
 const savedElem = document.getElementsByClassName('saving')[0];
 const videoElem = document.getElementsByClassName('input_video')[0];
+const userNameElem = document.getElementById("name");
+const signNameElem = document.getElementById("sign");
 const canvasElem = document.getElementsByClassName('output_canvas')[0];
 const canvasCtx = canvasElem.getContext('2d');
-
+var userName = ""
+var signName = ""
 
 // ==== Global Variables ====
 let s3; // gets set by initializeAWS()
 let readyToCapture = false;
 let captureMode = "snapshot"; // either "snapshot" or "video"
+let isRightHanded = true;
 let saveNextFrame = false; // used in snapshot mode
 let recordingVideo = false; // used in video mode
 let landmarkList; // when recordingVideo is true, this is the list of landmarks for each frame
@@ -31,6 +35,7 @@ function initializeAWS() {
 }
 
 
+
 /*
  * This needs to be called before we begin. It initializes controls on the page.
  */
@@ -41,6 +46,14 @@ function initializeControls() {
     document.getElementById("video").onclick = function() {
         captureMode = "video";
     }
+    document.getElementById("right").onclick = function() {
+        isRightHanded = true;
+    };
+    document.getElementById("left").onclick = function() {
+        isRightHanded = false;
+    }
+    userNameElem.value = "";
+    signNameElem.value = "";
 }
 
 
@@ -125,12 +138,13 @@ function showUserSaveHappened() {
  * Function called after a single frame has been taken.
  */
 function saveSingleFrame(handResults, imageAsBlob) {
+
     // --- Select a random ID to use ---
     const randomId = getRandomId();
     console.log(`saving to id ${randomId}`);
 
     // --- Write the landmarks ---
-    const dataAsAString = JSON.stringify(handResults.multiHandLandmarks);
+    const dataAsAString = JSON.stringify(handResults.multiHandLandmarks)
     const uploadInstructionsForLandmark = {
         Bucket: 'asl-dictionary-uploads',
         Key: `uploads/${randomId}/landmarks.json`,
@@ -142,6 +156,23 @@ function saveSingleFrame(handResults, imageAsBlob) {
             throw err;
         }
         console.log("finished saving landmark");
+    });
+
+    // --- Write the info ---
+    userName = document.getElementById("name").value
+    signName = document.getElementById("sign").value
+    const jsonInfo = JSON.stringify({isRightHanded: isRightHanded, userName: userName, signName: signName})
+    const uploadInstructionsForInfo = {
+        Bucket: 'asl-dictionary-uploads',
+        Key: `uploads/${randomId}/info.json`,
+        ContentType: "application/json", //subtly important
+        Body: jsonInfo
+    };
+    s3.upload(uploadInstructionsForInfo, function(err) {
+        if (err) {
+            throw err;
+        }
+        console.log("finished saving info");
     });
 
     // --- Write the image ---
@@ -210,6 +241,23 @@ function saveVideo(landmarkList, videoAsBlob) {
         console.log("finished saving landmark");
     });
 
+    // --- Write the info ---
+    userName = document.getElementById("name").value
+    signName = document.getElementById("sign").value
+    const jsonInfo = JSON.stringify({isRightHanded: isRightHanded, userName: userName, signName: signName})
+    const uploadInstructionsForInfo = {
+        Bucket: 'asl-dictionary-uploads',
+        Key: `uploads/${randomId}/info.json`,
+        ContentType: "application/json", //subtly important
+        Body: jsonInfo
+    };
+    s3.upload(uploadInstructionsForInfo, function(err) {
+        if (err) {
+            throw err;
+        }
+        console.log("finished saving info");
+    });
+
     // --- Write the video ---
     console.log("about to save video");
     const uploadInstructionsForVideo = {
@@ -236,8 +284,8 @@ function saveVideo(landmarkList, videoAsBlob) {
  */
 function getRandomId() {
     const d = new Date();
-    const date = d.getFullYear()+"-"+d.getMonth()+"-"+d.getDay()+"-"+d.getHours()+"-"+d.getMinutes()
-    return date+"-"+Math.ceil(Math.random() * 10000000);
+    const date = d.toISOString() //date is in UK time(hours will seem wrong but the rest is great)
+    return date +"-"+Math.ceil(Math.random() * 10000000);
 }
 
 

@@ -56,3 +56,7 @@
 .saving.showing {
     visibility: visible;
 }
+
+.hidden {
+    visibility: hidden;
+}
