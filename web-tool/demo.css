@@ -57,6 +57,21 @@
     visibility: visible;
 }
 
+.sureButtons {
+    position: absolute; /*maybe should be relative if we want side bar */
+    display: inline-block;
+    top:50%;
+    left: 50%;
+    margin: auto;
+    background-color: #FFFFFF;
+    padding: 15px;
+    border: 2px solid #060606;
+    border-radius: 15px;
+    height: auto;
+    width: auto;
+    font-size: x-large;
+}
+
 .hidden {
     visibility: hidden;
 }

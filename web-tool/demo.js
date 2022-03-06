@@ -6,8 +6,8 @@ const userNameElem = document.getElementById("name");
 const signNameElem = document.getElementById("sign");
 const canvasElem = document.getElementsByClassName('output_canvas')[0];
 const canvasCtx = canvasElem.getContext('2d');
-var userName = ""
-var signName = ""
+let userName = ""
+let signName = ""
 
 // ==== Global Variables ====
 let s3; // gets set by initializeAWS()
@@ -18,8 +18,11 @@ let saveNextFrame = false; // used in snapshot mode
 let recordingVideo = false; // used in video mode
 let landmarkList; // when recordingVideo is true, this is the list of landmarks for each frame
 let recorder; // when recordingVideo is true, this is the recorder object
-
-
+let doCapture = "notSet"; //either "notSet", "true" or "false"
+let globalHandResults;
+let globalImageAsBlob;
+let globalLandmarkList;
+let globalBlobEvent;
 // ==== Functions ====
 
 /*
@@ -138,7 +141,6 @@ function showUserSaveHappened() {
  * Function called after a single frame has been taken.
  */
 function saveSingleFrame(handResults, imageAsBlob) {
-
     // --- Select a random ID to use ---
     const randomId = getRandomId();
     console.log(`saving to id ${randomId}`);
@@ -212,7 +214,10 @@ function canvasAsBlob(canvasElem) {
 
 
 function onVideoDataAvailable(blobEvent) {
-    saveVideo(landmarkList, blobEvent.data);
+    const sureButtonsElem = document.getElementById("sureButtons")
+    sureButtonsElem.classList.remove("hidden")
+    globalLandmarkList = landmarkList;
+    globalBlobEvent = blobEvent.data;
     landmarkList = null; // we saved it, so we don't need this data anymore
     recorder = null; // we saved it, so we don't need this data anymore
 }
@@ -317,13 +322,37 @@ function onHandsResults(handResults) {
     // --- If we need to, go ahead and save the data ---
     if (saveNextFrame) {
         saveNextFrame = false;
-        saveSingleFrame(handResults, imageAsBlob);
+        const sureButtonsElem = document.getElementById("sureButtons")
+        sureButtonsElem.classList.remove("hidden")
+        console.log("going to waitFOrBottuns")
+        globalHandResults = handResults;
+        globalImageAsBlob = imageAsBlob;
     }
     if (recordingVideo) {
         landmarkList.push(handResults.multiHandLandmarks);
     }
 }
 
+function startCapture() {
+    console.log("clicked yes")
+    doCapture = "true";
+    const sureButtonsElem = document.getElementById("sureButtons");
+    sureButtonsElem.classList.add("hidden");
+    // Want to do this:
+    if(captureMode === "snapshot") {
+        saveSingleFrame(globalHandResults, globalImageAsBlob);
+    }
+    if(captureMode === "video") {
+        saveVideo(globalLandmarkList, globalBlobEvent);
+    }
+}
+
+function noCapture() {
+    console.log("clicked no")
+    doCapture = "false";
+    const sureButtonsElem = document.getElementById("sureButtons")
+    sureButtonsElem.classList.add("hidden")
+}
 
 
 function startRunningCamera() {
