@@ -163,7 +163,13 @@ function saveSingleFrame(handResults, imageAsBlob) {
     // --- Write the info ---
     userName = document.getElementById("name").value
     signName = document.getElementById("sign").value
-    const jsonInfo = JSON.stringify({isRightHanded: isRightHanded, userName: userName, signName: signName})
+    let isVideo;
+    if(captureMode === "snapshot") {
+        isVideo = false;
+    } else {
+        isVideo = true;
+    }
+    const jsonInfo = JSON.stringify({isRightHanded: isRightHanded, userName: userName, signName: signName, isVideo: isVideo})
     const uploadInstructionsForInfo = {
         Bucket: 'asl-dictionary-uploads',
         Key: `uploads/${randomId}/info.json`,
@@ -249,7 +255,13 @@ function saveVideo(landmarkList, videoAsBlob) {
     // --- Write the info ---
     userName = document.getElementById("name").value
     signName = document.getElementById("sign").value
-    const jsonInfo = JSON.stringify({isRightHanded: isRightHanded, userName: userName, signName: signName})
+    let isVideo;
+    if(captureMode === "snapshot") {
+        isVideo = false;
+    } else {
+        isVideo = true;
+    }
+    const jsonInfo = JSON.stringify({isRightHanded: isRightHanded, userName: userName, signName: signName, isVideo: isVideo})
     const uploadInstructionsForInfo = {
         Bucket: 'asl-dictionary-uploads',
         Key: `uploads/${randomId}/info.json`,

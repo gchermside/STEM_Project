@@ -35,8 +35,8 @@ def machineLearning(X, y):
 def readFile():
     with open("src/frames1Hand.json", "r") as file:
         jsonFile = json.load(file)
-    y = []
-    X = []
+    y = [] #targets
+    X = [] #data
     for key, frames in jsonFile.items():
         for frame in frames:
             vector = frameJsonToVector(frame)
