@@ -191,6 +191,7 @@ function saveSingleFrame(handResults, imageAsBlob) {
     });
 
     // --- Write the image ---
+    console.log("thinking about saving picture")
     if(mayCaptureData === true) {
         console.log("about to save image");
         const uploadInstructionsForImage = {
@@ -205,6 +206,8 @@ function saveSingleFrame(handResults, imageAsBlob) {
             }
             console.log("finished saving image");
         });
+    } else {
+        console.log("won't save picture")
     }
 
 
