@@ -18,7 +18,9 @@
       <video class="input_video"></video>
       <canvas class="output_canvas" width="1280px" height="720px"></canvas>
       <div class="controls">
-        <div class="title">Controls</div>
+        <div class="title">Controls</a></div>
+        <a href="index.html"><button>info</button></a>
+        <br>
         <div>
           <input type="radio" name="format" id="snapshot" value="snapshot" checked>
           <label for="snapshot">Snapshot</label>
@@ -35,6 +37,7 @@
         <label>Enter the Sign Name</label>
         <br>
         <input type="text" id="sign">
+        <br>
         <div>
           <input type="radio" name="handedness" id="right" value="right" checked>
           <label for="right">Right Handed</label>
@@ -42,6 +45,15 @@
         <div>
           <input type="radio" name="handedness" id="left" value="left">
           <label for="left">Left Handed</label>
+        </div>
+        <br>
+        <div>
+          <input type="radio" name="mayCaptureImage" id="mayCaptureImage" value="mayCaptureImage">
+          <label for="mayCaptureImage">You may capture my image as an example</label>
+        </div>
+        <div>
+          <input type="radio" name="mayCaptureImage" id="mayNotCaptureImage" value="mayNotCaptureImage" checked>
+          <label for="mayNotCaptureImage">You may NOT capture my image as an example</label>
         </div>
         <div id="enterNameAndSign" class="hidden">Must Enter a Name and Sign Name</div>
       </div>

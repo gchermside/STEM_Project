@@ -8,11 +8,12 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 import json
 from sklearn.model_selection import train_test_split
-
-def toVector(image):
+from sklearn import tree
+def toVectorandRegularize(image):
     vector = []
     if len(image) == 1:
-        for hand in image:
+        for unRegHand in image:
+            hand = functions.regularizeJsonHand(unRegHand)
             for points in hand:
                 vector.append(points["x"])
                 vector.append(points["y"])
@@ -25,7 +26,7 @@ def readDic(dic):
     y = [] #targets
     for key, items in dic.items():
         for item in items:
-            vector = toVector(item)
+            vector = toVectorandRegularize(item)
             if vector == [] or y == "":
                 print("dud, skipping")
             else:
@@ -34,13 +35,13 @@ def readDic(dic):
     return X, y
 
 def machineLearning(X, y):
-    XTrain, XTest, yTrain, yTest = train_test_split(X, y, test_size = .20)
+    XTrain, XTest, yTrain, yTest = train_test_split(X, y, test_size = .30)
     print(f"xTrain is {XTrain}")
     print(f"xTest is {XTest}")
     print(f"yTrain is {yTrain}")
     print(f"yTest is {yTest}")
     print(f"length of training {len(XTrain)}")
-    model = RandomForestClassifier()
+    model = RandomForestClassifier() #change this line to test new models
     model.fit(XTrain, yTrain)
     prediction =model.predict(XTest)
     print(prediction)
@@ -49,7 +50,7 @@ def machineLearning(X, y):
     for i in range(0, len(yTest)):
         if prediction[i] != yTest[i]:
             totalWrong = totalWrong+1
-        print(f"prediction {prediction[i]} is acutally {yTest[i]}")
+        print(f"prediction {prediction[i]} is actually {yTest[i]}")
     print(f"percentage wrong: {totalWrong/len(yTest) * 100}")
     print(totalWrong)
     print(len(yTest))

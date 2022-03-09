@@ -14,6 +14,7 @@ let s3; // gets set by initializeAWS()
 let readyToCapture = false;
 let captureMode = "snapshot"; // either "snapshot" or "video"
 let isRightHanded = true;
+let mayCaptureData = false;
 let saveNextFrame = false; // used in snapshot mode
 let recordingVideo = false; // used in video mode
 let landmarkList; // when recordingVideo is true, this is the list of landmarks for each frame
@@ -54,6 +55,12 @@ function initializeControls() {
     };
     document.getElementById("left").onclick = function() {
         isRightHanded = false;
+    }
+    document.getElementById("mayCaptureImage").onclick = function() {
+        mayCaptureData = true;
+    };
+    document.getElementById("mayNotCaptureImage").onclick = function() {
+        mayCaptureData = false;
     }
     userNameElem.value = "";
     signNameElem.value = "";
@@ -169,7 +176,7 @@ function saveSingleFrame(handResults, imageAsBlob) {
     } else {
         isVideo = true;
     }
-    const jsonInfo = JSON.stringify({isRightHanded: isRightHanded, userName: userName, signName: signName, isVideo: isVideo})
+    const jsonInfo = JSON.stringify({isRightHanded: isRightHanded, userName: userName, signName: signName, isVideo: isVideo, mayCaptureData: mayCaptureData})
     const uploadInstructionsForInfo = {
         Bucket: 'asl-dictionary-uploads',
         Key: `uploads/${randomId}/info.json`,
@@ -184,19 +191,22 @@ function saveSingleFrame(handResults, imageAsBlob) {
     });
 
     // --- Write the image ---
-    console.log("about to save image");
-    const uploadInstructionsForImage = {
-        Bucket: 'asl-dictionary-uploads',
-        Key: `uploads/${randomId}/image.jpeg`,
-        ContentType: "image/jpeg",
-        Body: imageAsBlob
-    };
-    s3.upload(uploadInstructionsForImage, function(err) {
-        if (err) {
-            throw err;
-        }
-        console.log("finished saving image");
-    });
+    if(mayCaptureData === true) {
+        console.log("about to save image");
+        const uploadInstructionsForImage = {
+            Bucket: 'asl-dictionary-uploads',
+            Key: `uploads/${randomId}/image.jpeg`,
+            ContentType: "image/jpeg",
+            Body: imageAsBlob
+        };
+        s3.upload(uploadInstructionsForImage, function(err) {
+            if (err) {
+                throw err;
+            }
+            console.log("finished saving image");
+        });
+    }
+
 
     // --- Perform animation ---
     // NOTE: the save hasn't happened yet, it is still going on. So we're lying to the user.
@@ -261,7 +271,7 @@ function saveVideo(landmarkList, videoAsBlob) {
     } else {
         isVideo = true;
     }
-    const jsonInfo = JSON.stringify({isRightHanded: isRightHanded, userName: userName, signName: signName, isVideo: isVideo})
+    const jsonInfo = JSON.stringify({isRightHanded: isRightHanded, userName: userName, signName: signName, isVideo: isVideo, mayCaptureData: mayCaptureData})
     const uploadInstructionsForInfo = {
         Bucket: 'asl-dictionary-uploads',
         Key: `uploads/${randomId}/info.json`,
@@ -276,19 +286,21 @@ function saveVideo(landmarkList, videoAsBlob) {
     });
 
     // --- Write the video ---
-    console.log("about to save video");
-    const uploadInstructionsForVideo = {
-        Bucket: 'asl-dictionary-uploads',
-        Key: `uploads/${randomId}/video.webm`,
-        ContentType: "video/webm",
-        Body: videoAsBlob
-    };
-    s3.upload(uploadInstructionsForVideo, function(err) {
-        if (err) {
-            throw err;
-        }
-        console.log("finished saving video");
-    });
+    if(mayCaptureData === true) {
+        console.log("about to save video");
+        const uploadInstructionsForVideo = {
+            Bucket: 'asl-dictionary-uploads',
+            Key: `uploads/${randomId}/video.webm`,
+            ContentType: "video/webm",
+            Body: videoAsBlob
+        };
+        s3.upload(uploadInstructionsForVideo, function(err) {
+            if (err) {
+                throw err;
+            }
+            console.log("finished saving video");
+        });
+    }
 
     // --- Perform animation ---
     // NOTE: the save hasn't happened yet, it is still going on. So we're lying to the user.
