@@ -317,7 +317,8 @@ function saveVideo(landmarkList, videoAsBlob) {
 function getRandomId() {
     const d = new Date();
     const date = d.toISOString() //date is in UK time(hours will seem wrong but the rest is great)
-    return date +"-"+Math.ceil(Math.random() * 10000000);
+    const date_ = date.replaceAll(":", "_");
+    return date_ +"-"+Math.ceil(Math.random() * 10000000);
 }
 
 
