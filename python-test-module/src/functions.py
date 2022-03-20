@@ -159,3 +159,69 @@ def findVideo(video, storage):
                         words.insert(i,(signName, closeness))
                         break
     return words
+
+
+def regularlizeVideo(video):
+    NUM_OF_FRAMES = 15
+    length  = len(video)
+    newVideo = []
+    frames1 = 0
+    frames2 = 0
+    for frame in video:
+        if len(frame) == 0:
+            print("empty frame")
+        elif len(frame) == 1:
+            frames1 += 1
+        else:
+            print("two hands")
+            frames2 += 1
+    if frames1 == len(video):
+        #This is a one handed sign
+        print("one handed sign")
+        if len(video) > NUM_OF_FRAMES:
+            for i in range(0, NUM_OF_FRAMES):
+                percent, spot = math.modf(length * i/NUM_OF_FRAMES)
+                spotInt = int(length * i/NUM_OF_FRAMES)
+                newHand = interpolateHand(video[spotInt][0], video[int(spotInt+1)][0], percent)
+                newVideo.append([newHand])
+            return newVideo
+        else:
+            print("as for now, probably too short")
+
+    elif frames2 >= frames1:
+        # this is a two handed sign
+        print("not using two handed signs yet")
+    else:
+        print("this sign is ambiguous, will use later")
+    return None
+
+
+def interpolateCoordinate(p1, p2, percent):
+    return ((p2-p1) * percent) + p1
+
+
+def interpolatePoint(p1, p2, percent):
+    newPoint = {'x': interpolateCoordinate(p1['x'], p2['x'], percent),
+                'y': interpolateCoordinate(p1['y'], p2['y'], percent),
+                'z': interpolateCoordinate(p1['z'], p2['z'], percent)}
+    return newPoint
+
+
+def interpolateHand(hand1, hand2, percent):
+    newHand = []
+    for point1 in hand1:
+        for point2 in hand2:
+            newPoint = interpolatePoint(point1, point2, percent)
+            newHand.append(newPoint)
+    return newHand
+
+
+def vectorVideo(video):
+    vector = []
+    for frame in video:
+        for hand in frame:
+            for point in hand:
+                vector.append(point['x'])
+                vector.append(point['y'])
+                vector.append(point['z'])
+    return vector
