@@ -79,5 +79,5 @@ DecisionTreeClassifier = 27
 MLPClassifier(hidden_layer_sizes=(150,100,50), max_iter=2000,activation = 'relu',solver='sgd',random_state=1) = 8.717948717948717
 
 failure rate of video model
-17%, 15% = MLPClassifier(hidden_layer_sizes=(150,100,50), max_iter=2000,activation = 'relu',solver='adam',random_state=1)
-19 % = MLPClassifier(hidden_layer_sizes=(150,100,50), max_iter=2000,activation = 'relu',solver='lbfgs',random_state=1)
+10% = MLPClassifier(hidden_layer_sizes=(150,100,50), max_iter=2000,activation = 'relu',solver='adam',random_state=1)
+12.5% 11% 14.5% 10% = MLPClassifier(hidden_layer_sizes=(150,100,50), max_iter=2000,activation = 'relu',solver='lbfgs',random_state=1)

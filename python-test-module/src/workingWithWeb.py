@@ -43,7 +43,7 @@ def readVideoDic(dic):
     for key, items in dic.items():
         for item in items:
             vector = functions.vectorVideo(item)
-            if vector == [] or y == "":
+            if vector == [] or y == "" or vector == None:
                 print("dud, skipping")
             else:
                 X.append(vector)
@@ -53,7 +53,7 @@ def readVideoDic(dic):
 def machineLearning(X, y):
     XTrain, XTest, yTrain, yTest = train_test_split(X, y, test_size = .10)
     # print(f"length of training {len(XTrain)}")
-    model = MLPClassifier(hidden_layer_sizes=(150,100,50), max_iter=2000,activation = 'relu',solver='adam',random_state=1) #change this line to test new models
+    model = MLPClassifier(hidden_layer_sizes=(150,100,50), max_iter=2000,activation = 'relu',solver='lbfgs',random_state=1) #change this line to test new models
     model.fit(XTrain, yTrain)
     prediction = model.predict(XTest)
     totalWrong = 0
@@ -121,7 +121,6 @@ if vorp == "v":
                 functions.addNewThing(key, newVideo, videoHandDic)
     # machine learning
     X, y = readVideoDic(videoHandDic)
-    print(len(y))
     print(y)
     total = 0
     count = 0

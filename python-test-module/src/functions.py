@@ -163,10 +163,12 @@ def findVideo(video, storage):
 
 def regularlizeVideo(video):
     NUM_OF_FRAMES = 15
-    length  = len(video)
+    FRACTION_FOR_VIDEO_HANDEDNESS = 0.75
     newVideo = []
     frames1 = 0
     frames2 = 0
+    if len(video) < 5:
+        return None
     for frame in video:
         if len(frame) == 0:
             print("empty frame")
@@ -175,18 +177,36 @@ def regularlizeVideo(video):
         else:
             print("two hands")
             frames2 += 1
-    if frames1 == len(video):
+    if frames1/len(video) > FRACTION_FOR_VIDEO_HANDEDNESS:
         #This is a one handed sign
-        print("one handed sign")
-        if len(video) > NUM_OF_FRAMES:
-            for i in range(0, NUM_OF_FRAMES):
-                percent, spot = math.modf(length * i/NUM_OF_FRAMES)
-                spotInt = int(length * i/NUM_OF_FRAMES)
-                newHand = interpolateHand(video[spotInt][0], video[int(spotInt+1)][0], percent)
-                newVideo.append([newHand])
-            return newVideo
-        else:
-            print("as for now, probably too short")
+        fractions = []
+        indexes = []
+        for index in range(0, len(video)):
+            if len(video[index]) == 1: # if exactly one hand
+                indexes.append(index)
+        length = indexes[-1] - indexes[0] + 1
+        for index in indexes:
+            fractions.append((index-indexes[0])/(length-1))
+        assert fractions[0] == 0 and fractions[-1] == 1
+        for num in range(0, NUM_OF_FRAMES):
+            d = num/(NUM_OF_FRAMES-1)
+            assert 0 <= d <= 1
+            for frameNum in range(0, len(fractions)):
+                if d == fractions[frameNum]:
+                    newVideo.append(video[indexes[frameNum]])
+                    break
+                elif d < fractions[frameNum]:
+                    assert frameNum > 0
+                    hand1 = video[indexes[frameNum-1]][0]
+                    hand2 = video[indexes[frameNum]][0]
+                    percent = (d-fractions[frameNum-1])/(fractions[frameNum] - fractions[frameNum-1])
+                    newHand = interpolateHand(hand1, hand2, percent)
+                    newVideo.append([newHand])
+                    break
+            else:
+                assert False
+        assert len(newVideo) == NUM_OF_FRAMES
+        return newVideo
 
     elif frames2 >= frames1:
         # this is a two handed sign
@@ -209,10 +229,14 @@ def interpolatePoint(p1, p2, percent):
 
 def interpolateHand(hand1, hand2, percent):
     newHand = []
-    for point1 in hand1:
-        for point2 in hand2:
-            newPoint = interpolatePoint(point1, point2, percent)
-            newHand.append(newPoint)
+    assert len(hand1) == len(hand2)
+    for i in range(0, len(hand1)):
+        newPoint = interpolatePoint(hand1[i], hand2[i], percent)
+        newHand.append(newPoint)
+    for point in newHand:
+        p = point['x']
+        if p<-20 or p>100:
+            print(f"point is {p}")
     return newHand
 
 
@@ -221,7 +245,12 @@ def vectorVideo(video):
     for frame in video:
         for hand in frame:
             for point in hand:
-                vector.append(point['x'])
-                vector.append(point['y'])
-                vector.append(point['z'])
+                try:
+                    vector.append(point['x'])
+                    vector.append(point['y'])
+                    vector.append(point['z'])
+                except:
+                    print("error in vector")
+                    print(f"hand is {hand}")
+                    return None
     return vector
