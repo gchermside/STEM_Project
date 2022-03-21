@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <title>Data Entry</title>
     <!--    code to get mediapipes library-->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
@@ -18,8 +19,7 @@
       <video class="input_video"></video>
       <canvas class="output_canvas" width="1280px" height="720px"></canvas>
       <div class="controls">
-        <div class="title">Controls</a></div>
-        <a href="index.html"><button>info</button></a>
+        <div class="title">Controls</a><a href="index.html"><button>i</button></a></div>
         <br>
         <div>
           <input type="radio" name="format" id="snapshot" value="snapshot" checked>
@@ -55,6 +55,9 @@
           <input type="radio" name="mayCaptureImage" id="mayNotCaptureImage" value="mayNotCaptureImage" checked>
           <label for="mayNotCaptureImage">You may NOT capture my image as an example</label>
         </div>
+        <p class="dcp">If you allow us to capture your image you are agreeing</p>
+        <p class="dcp">to this release form:</p>
+        <a href="releaseform.html" target="_blank"><button>Release Form</button></a>
         <div id="enterNameAndSign" class="hidden">Must Enter a Name and Sign Name</div>
       </div>
       <div>

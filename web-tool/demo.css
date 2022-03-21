@@ -20,7 +20,7 @@
     display: inline-block;
     left: 20px;
     bottom: 20px;
-    background-color: #FFFFFF;
+    background-color: rgba(37, 37, 37);
     padding: 5px;
     border: 2px solid #060606;
     border-radius: 15px;
@@ -30,6 +30,7 @@
 
 .controls .title {
     text-align: center;
+    color: rgba(105, 141, 250);
 }
 .instructions {
     text-align: center;
@@ -44,7 +45,7 @@
     top:50%;
     left: 50%;
     margin: auto;
-    background-color: #FFFFFF;
+    background-color: rgba(37, 37, 37);
     padding: 15px;
     border: 2px solid #060606;
     border-radius: 15px;
@@ -63,7 +64,7 @@
     top:50%;
     left: 50%;
     margin: auto;
-    background-color: #FFFFFF;
+    background-color: rgba(37, 37, 37);
     padding: 15px;
     border: 2px solid #060606;
     border-radius: 15px;
@@ -74,4 +75,41 @@
 
 .hidden {
     visibility: hidden;
+}
+
+h1 {
+    color: rgba(105, 141, 250);
+    text-align: center;
+}
+
+h2 {
+    color: rgba(174, 174, 174);
+    text-align: center;
+}
+
+p {
+    color: rgba(174, 174, 174);
+    text-align: center;
+}
+
+body {
+    background-color: rgba(37, 37, 37);
+}
+
+button{
+    background-color: rgba(37, 37, 37);
+    color: rgba(174, 174, 174);
+}
+
+div {
+    background-color: rgba(37, 37, 37);
+    color: rgba(174, 174, 174);
+}
+
+.welcomeb {
+    text-align: center;
+}
+
+.dcp {
+    text-align: left;
 }
