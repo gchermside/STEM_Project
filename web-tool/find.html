@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <meta charset="utf-8">
     <title>Data Entry</title>
     <!--    code to get mediapipes library-->
@@ -11,23 +11,23 @@
     <!--    gets AWS library-->
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1079.0.min.js"></script>
     <!--    loads css file-->
-    <link rel="stylesheet" type="text/css" href="demo.css">
-  </head>
+    <link rel="stylesheet" type="text/css" href="all.css">
+</head>
 
-  <body>
-    <div class="container">
-      <video class="input_video"></video>
-      <canvas class="output_canvas" width="1280px" height="720px"></canvas>
-      <div class="controls">
+<body>
+<div class="container">
+    <video class="input_video"></video>
+    <canvas class="output_canvas" width="1280px" height="720px"></canvas>
+    <div class="controls">
         <div class="title">Controls</a><a href="index.html"><button>i</button></a></div>
         <br>
         <div>
-          <input type="radio" name="format" id="snapshot" value="snapshot" checked>
-          <label for="snapshot">Snapshot</label>
+            <input type="radio" name="format" id="snapshot" value="snapshot" checked>
+            <label for="snapshot">Snapshot</label>
         </div>
         <div>
-          <input type="radio" name="format" id="video" value="video">
-          <label for="video">Video</label>
+            <input type="radio" name="format" id="video" value="video">
+            <label for="video">Video</label>
         </div>
         <div class="instructions notReady">Space to Record</div>
         <label>Enter your Name</label>
@@ -39,37 +39,37 @@
         <input type="text" id="sign">
         <br>
         <div>
-          <input type="radio" name="handedness" id="right" value="right" checked>
-          <label for="right">Right Handed</label>
+            <input type="radio" name="handedness" id="right" value="right" checked>
+            <label for="right">Right Handed</label>
         </div>
         <div>
-          <input type="radio" name="handedness" id="left" value="left">
-          <label for="left">Left Handed</label>
+            <input type="radio" name="handedness" id="left" value="left">
+            <label for="left">Left Handed</label>
         </div>
         <br>
         <div>
-          <input type="radio" name="mayCaptureImage" id="mayCaptureImage" value="mayCaptureImage">
-          <label for="mayCaptureImage">You may capture my image as an example</label>
+            <input type="radio" name="mayCaptureImage" id="mayCaptureImage" value="mayCaptureImage">
+            <label for="mayCaptureImage">You may capture my image as an example</label>
         </div>
         <div>
-          <input type="radio" name="mayCaptureImage" id="mayNotCaptureImage" value="mayNotCaptureImage" checked>
-          <label for="mayNotCaptureImage">You may NOT capture my image as an example</label>
+            <input type="radio" name="mayCaptureImage" id="mayNotCaptureImage" value="mayNotCaptureImage" checked>
+            <label for="mayNotCaptureImage">You may NOT capture my image as an example</label>
         </div>
         <p class="dcp">If you allow us to capture your image you are agreeing</p>
         <p class="dcp">to this release form:</p>
         <a href="releaseform.html" target="_blank"><button>Release Form</button></a>
         <div id="enterNameAndSign" class="hidden">Must Enter a Name and Sign Name</div>
-      </div>
-      <div>
+    </div>
+    <div>
         <div class="saving">Saving</div>
-      </div>
-      <div id="sureButtons" class="sureButtons hidden">
+    </div>
+    <div id="sureButtons" class="sureButtons hidden">
         <div>Are you sure you want to save</div>
         <button onclick="startCapture()">Yes</button>
         <button onclick="noCapture()">No</button>
-      </div>
     </div>
-    <script type="text/javascript" src="passwords.js"></script>
-    <script type="text/javascript" src="demo.js"></script>
-  </body>
+</div>
+<script type="text/javascript" src="passwords.js"></script>
+<script type="text/javascript" src="collect.js"></script>
+</body>
 </html>
