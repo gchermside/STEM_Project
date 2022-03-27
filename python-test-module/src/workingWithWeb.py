@@ -12,6 +12,10 @@ from sklearn.tree import DecisionTreeClassifier
 import json
 from sklearn.model_selection import train_test_split
 from sklearn import tree
+
+import pickle
+
+
 def toVectorandRegularize(image):
     vector = []
     if len(image) == 1:
@@ -53,8 +57,7 @@ def readVideoDic(dic):
 def machineLearning(X, y):
     XTrain, XTest, yTrain, yTest = train_test_split(X, y, test_size = .10)
     # print(f"length of training {len(XTrain)}")
-    model = MLPClassifier(hidden_layer_sizes=(150,100,50), max_iter=2000,activation = 'relu',solver='lbfgs',random_state=1) #change this line to test new models
-    model.fit(XTrain, yTrain)
+    model = trainModel(XTrain, yTrain)
     prediction = model.predict(XTest)
     totalWrong = 0
     for i in range(0, len(yTest)):
@@ -64,9 +67,15 @@ def machineLearning(X, y):
     print(f"percentage wrong: {totalWrong/len(yTest) * 100}")
     print(totalWrong)
     print(len(yTest))
-    return totalWrong/len(yTest) * 100
+    return (totalWrong/len(yTest) * 100), model
 
 # percentage wrong: 2.4285714285714284
+
+def trainModel(XTrain, yTrain):
+    model = MLPClassifier(hidden_layer_sizes=(150,100,50), max_iter=2000,activation = 'relu',solver='adam',random_state=1) #change this line to test new models
+    model.fit(XTrain, yTrain)
+    return model
+
 
 client = boto3.client(
     's3',
@@ -75,7 +84,25 @@ client = boto3.client(
     region_name = 'us-east-1'
 )
 
-# Creating the high level object oriented interface
+
+
+def saveModel(model, fileName):
+    with open(f"../models/{fileName}.pkl", "wb") as outfile:
+        pickle.dump(model, outfile, protocol=5)
+
+
+def loadModel(fileName):
+    with open(f"../models/{fileName}.pkl", "rb") as infile:
+        return pickle.load(infile)
+
+
+
+def readLandmark(directory, subDir):
+    landmarksJson = directory+"/"+subDir+"/landmarks.json"
+    with open(landmarksJson, 'r') as landmarkFile:
+        return json.load(landmarkFile)
+
+
 
 
 def readInData():
@@ -101,43 +128,3 @@ def readInData():
                     thisIsAPlaceHolder = 0
     return imageHandDic, videoHandDic
 
-
-imageHandDic, videoHandDicNotRegularized = readInData()
-print(f"length of old dic {len(videoHandDicNotRegularized)}")
-num = 0
-for value in videoHandDicNotRegularized.values():
-    for video in value:
-        num += 1
-print(f"num is {num}")
-vorp = input("Do you want to test video or picture?(type v or p): ")
-if vorp == "v":
-    # training model for video
-    print("ok")
-    videoHandDic = {}
-    for key, value in videoHandDicNotRegularized.items():
-        for video in value:
-            newVideo = functions.regularlizeVideo(video)
-            if newVideo is not None:
-                functions.addNewThing(key, newVideo, videoHandDic)
-    # machine learning
-    X, y = readVideoDic(videoHandDic)
-    print(y)
-    total = 0
-    count = 0
-    for i in range(0, 10):
-        count = count+1
-        total += machineLearning(X, y)
-    print("overall average is ")
-    print(total/count)
-else:
-    # training model on picture data
-    X, y = readPictureDic(imageHandDic)
-    print(len(X))
-    print(len(y))
-    total = 0
-    count = 0
-    for i in range(0, 40):
-        count = count+1
-        total += machineLearning(X, y)
-    print("overall average is ")
-    print(total/count)
