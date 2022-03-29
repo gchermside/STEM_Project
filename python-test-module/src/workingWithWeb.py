@@ -1,26 +1,55 @@
 import boto3
 import passwords
-import json
-import functions
 import os
+import pickle
+import json
 import sklearn
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.tree import DecisionTreeClassifier
-import json
 from sklearn.model_selection import train_test_split
-from sklearn import tree
 
-import pickle
+
+# this function points moves the hand so the wrist is at 0,0 and makes it a consistant
+# porportion(the length between point 0 and 1 will always be the same on hands)
+def regularizeJsonHand(originalHand):
+    hand = originalHand
+    xShift = hand[0]["x"]
+    yShift = hand[0]["y"]
+    zShift = hand[0]["z"]
+    for lm in hand:
+        lm["x"] = lm["x"] - xShift
+        lm["y"] = lm["y"] - yShift
+        lm["z"] = lm["z"] - zShift
+    p1 = hand[1]
+    mult = 1/(((p1["x"])**2 + (p1["y"])**2 + (p1["z"])**2)**(1/2))
+    for lm in hand:
+        lm["x"] = lm["x"] * mult
+        lm["y"] = lm["y"] * mult
+        lm["z"] = lm["z"] * mult
+    return hand
+
+
+
+def addNewThing(word, thing, dictionary):
+    word.lower()
+    if word != "none" and word != "None":
+        if word in dictionary:
+            dictionary[word].append(thing)
+        else:
+            dictionary[word] = [thing]
+    else:
+        print("ok, we won't store that photo for you")
+
 
 
 def toVectorandRegularize(image):
     vector = []
     if len(image) == 1:
         for unRegHand in image:
-            hand = functions.regularizeJsonHand(unRegHand)
+            hand = regularizeJsonHand(unRegHand)
             for points in hand:
                 vector.append(points["x"])
                 vector.append(points["y"])
@@ -32,13 +61,19 @@ def readPictureDic(dic):
     X = [] #data
     y = [] #targets
     for key, items in dic.items():
-        for item in items:
-            vector = toVectorandRegularize(item)
-            if vector == [] or y == "":
-                print("dud, skipping")
+        if "  " in key:
+            print("spaces, skipping")
+        else:
+            if len(key) >1:
+                print("not single letter or number, skipping")
             else:
-                X.append(vector)
-                y.append(key)
+                for item in items:
+                    vector = toVectorandRegularize(item)
+                    if vector == [] or y == "":
+                        print("dud, skipping")
+                    else:
+                        X.append(vector)
+                        y.append(key)
     return X, y
 
 def readVideoDic(dic):
@@ -46,13 +81,31 @@ def readVideoDic(dic):
     y = [] #targets
     for key, items in dic.items():
         for item in items:
-            vector = functions.vectorVideo(item)
+            vector = vectorVideo(item)
             if vector == [] or y == "" or vector == None:
                 print("dud, skipping")
             else:
                 X.append(vector)
                 y.append(key)
     return X, y
+
+
+
+def vectorVideo(video):
+    vector = []
+    for frame in video:
+        for hand in frame:
+            for point in hand:
+                try:
+                    vector.append(point['x'])
+                    vector.append(point['y'])
+                    vector.append(point['z'])
+                except:
+                    print("error in vector")
+                    print(f"hand is {hand}")
+                    return None
+    return vector
+
 
 def machineLearning(X, y):
     XTrain, XTest, yTrain, yTest = train_test_split(X, y, test_size = .10)
@@ -121,9 +174,9 @@ def readInData():
                 signName = signName.lower()
                 try:
                     if jsonReadableInfo['isVideo'] == True:
-                        functions.addNewThing(signName, jsonReadableLandmarks, videoHandDic)
+                        addNewThing(signName, jsonReadableLandmarks, videoHandDic)
                     else:
-                        functions.addNewThing(signName, jsonReadableLandmarks, imageHandDic)
+                        addNewThing(signName, jsonReadableLandmarks, imageHandDic)
                 except:
                     thisIsAPlaceHolder = 0
     return imageHandDic, videoHandDic

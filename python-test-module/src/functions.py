@@ -96,25 +96,6 @@ def regularize(hand):
         lm[2] = lm[2] * mult
 
 
-# this function points moves the hand so the wrist is at 0,0 and makes it a consistant
-# porportion(the length between point 0 and 1 will always be the same on hands)
-def regularizeJsonHand(originalHand):
-    hand = originalHand
-    xShift = hand[0]["x"]
-    yShift = hand[0]["y"]
-    zShift = hand[0]["z"]
-    for lm in hand:
-        lm["x"] = lm["x"] - xShift
-        lm["y"] = lm["y"] - yShift
-        lm["z"] = lm["z"] - zShift
-    p1 = hand[1]
-    mult = 1/(((p1["x"])**2 + (p1["y"])**2 + (p1["z"])**2)**(1/2))
-    for lm in hand:
-        lm["x"] = lm["x"] * mult
-        lm["y"] = lm["y"] * mult
-        lm["z"] = lm["z"] * mult
-    return hand
-
 
 def addNewThing(word, thing, dictionary):
     word.lower()
@@ -239,18 +220,3 @@ def interpolateHand(hand1, hand2, percent):
             print(f"point is {p}")
     return newHand
 
-
-def vectorVideo(video):
-    vector = []
-    for frame in video:
-        for hand in frame:
-            for point in hand:
-                try:
-                    vector.append(point['x'])
-                    vector.append(point['y'])
-                    vector.append(point['z'])
-                except:
-                    print("error in vector")
-                    print(f"hand is {hand}")
-                    return None
-    return vector

@@ -2,8 +2,6 @@
 const instructionsElem = document.getElementsByClassName('instructions')[0];
 const savedElem = document.getElementsByClassName('saving')[0];
 const videoElem = document.getElementsByClassName('input_video')[0];
-const userNameElem = document.getElementById("name");
-const signNameElem = document.getElementById("sign");
 const canvasElem = document.getElementsByClassName('output_canvas')[0];
 const canvasCtx = canvasElem.getContext('2d');
 
@@ -22,9 +20,6 @@ let globalHandResults;
 let globalImageAsBlob;
 let globalLandmarkList;
 let globalBlobEvent;
-let userName = ""
-let signName = ""
-
 // ==== Functions ====
 
 
@@ -46,14 +41,6 @@ function initializeControls() {
     document.getElementById("left").onclick = function() {
         isRightHanded = false;
     }
-    document.getElementById("mayCaptureImage").onclick = function() {
-        mayCaptureData = true;
-    };
-    document.getElementById("mayNotCaptureImage").onclick = function() {
-        mayCaptureData = false;
-    }
-    userNameElem.value = "";
-    signNameElem.value = "";
 }
 
 
@@ -75,72 +62,42 @@ function showUserSaveHappened() {
  * Function called after a single frame has been taken.
  */
 function saveSingleFrame(handResults, imageAsBlob) {
-    // --- Select a random ID to use ---
-    const randomId = getRandomId();
-    console.log(`saving to id ${randomId}`);
-
     // --- Write the landmarks ---
     const dataAsAString = JSON.stringify(handResults.multiHandLandmarks)
-    const uploadInstructionsForLandmark = {
-        Bucket: 'asl-dictionary-uploads',
-        Key: `uploads/${randomId}/landmarks.json`,
-        ContentType: "application/json", //subtly important
-        Body: dataAsAString
+    //fetch API here
+    const url = "https://ywpaxgg1if.execute-api.us-east-1.amazonaws.com/prod/find-picture";
+    const fetchSettings = {
+        method: "POST",
+        mode: "cors",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: dataAsAString
     };
-    s3.upload(uploadInstructionsForLandmark, function(err) {
-        if (err) {
-            throw err;
-        }
-        console.log("finished saving landmark");
-    });
-
-    // --- Write the info ---
-    userName = document.getElementById("name").value
-    signName = document.getElementById("sign").value
-    let isVideo;
-    if(captureMode === "snapshot") {
-        isVideo = false;
-    } else {
-        isVideo = true;
-    }
-    const jsonInfo = JSON.stringify({isRightHanded: isRightHanded, userName: userName, signName: signName, isVideo: isVideo, mayCaptureData: mayCaptureData})
-    const uploadInstructionsForInfo = {
-        Bucket: 'asl-dictionary-uploads',
-        Key: `uploads/${randomId}/info.json`,
-        ContentType: "application/json", //subtly important
-        Body: jsonInfo
-    };
-    s3.upload(uploadInstructionsForInfo, function(err) {
-        if (err) {
-            throw err;
-        }
-        console.log("finished saving info");
-    });
-
-    // --- Write the image ---
-    console.log("thinking about saving picture")
-    if(mayCaptureData === true) {
-        console.log("about to save image");
-        const uploadInstructionsForImage = {
-            Bucket: 'asl-dictionary-uploads',
-            Key: `uploads/${randomId}/image.jpeg`,
-            ContentType: "image/jpeg",
-            Body: imageAsBlob
-        };
-        s3.upload(uploadInstructionsForImage, function(err) {
-            if (err) {
-                throw err;
-            }
-            console.log("finished saving image");
+    fetch(url, fetchSettings)
+        .then(function(response){
+            response.json()
+                .then(function(json){
+                    console.log("I think the answer is: ", json.bestGuess);
+                });
+        })
+        .catch(function(err) {
+            console.log("Error fetching", err);
         });
-    } else {
-        console.log("won't save picture")
-    }
 
 
-    // --- Perform animation ---
-    // NOTE: the save hasn't happened yet, it is still going on. So we're lying to the user.
-    showUserSaveHappened();
+    // const uploadInstructionsForLandmark = {
+    //     Bucket: 'asl-dictionary-uploads',
+    //     Key: `uploads/${randomId}/landmarks.json`,
+    //     ContentType: "application/json", //subtly important
+    //     Body: dataAsAString
+    // };
+    // s3.upload(uploadInstructionsForLandmark, function(err) {
+    //     if (err) {
+    //         throw err;
+    //     }
+    //     console.log("finished saving landmark");
+    // });
 }
 
 

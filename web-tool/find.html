@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Data Entry</title>
+    <title>Sign Look Up</title>
     <!--    code to get mediapipes library-->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
@@ -30,14 +30,6 @@
             <label for="video">Video</label>
         </div>
         <div class="instructions notReady">Space to Record</div>
-        <label>Enter your Name</label>
-        <br>
-        <input type="text" id="name">
-        <br>
-        <label>Enter the Sign Name</label>
-        <br>
-        <input type="text" id="sign">
-        <br>
         <div>
             <input type="radio" name="handedness" id="right" value="right" checked>
             <label for="right">Right Handed</label>
@@ -47,18 +39,6 @@
             <label for="left">Left Handed</label>
         </div>
         <br>
-        <div>
-            <input type="radio" name="mayCaptureImage" id="mayCaptureImage" value="mayCaptureImage">
-            <label for="mayCaptureImage">You may capture my image as an example</label>
-        </div>
-        <div>
-            <input type="radio" name="mayCaptureImage" id="mayNotCaptureImage" value="mayNotCaptureImage" checked>
-            <label for="mayNotCaptureImage">You may NOT capture my image as an example</label>
-        </div>
-        <p class="dcp">If you allow us to capture your image you are agreeing</p>
-        <p class="dcp">to this release form:</p>
-        <a href="releaseform.html" target="_blank"><button>Release Form</button></a>
-        <div id="enterNameAndSign" class="hidden">Must Enter a Name and Sign Name</div>
     </div>
     <div>
         <div class="saving">Saving</div>
@@ -70,6 +50,7 @@
     </div>
 </div>
 <script type="text/javascript" src="passwords.js"></script>
-<script type="text/javascript" src="collect.js"></script>
+<script type="text/javascript" src="library.js"></script>
+<script type="text/javascript" src="find.js"></script>
 </body>
 </html>

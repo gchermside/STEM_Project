@@ -36,9 +36,9 @@ else:
     print(len(y))
     total = 0
     count = 0
-    for i in range(0, 1):
+    for i in range(0, 20):
         count = count+1
         totalPercent, model = machineLearning(X, y)
         total += totalPercent
-    print("overall average is ")
+    print("overall average for picture is ")
     print(total/count)

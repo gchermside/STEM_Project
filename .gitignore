@@ -1,2 +1,4 @@
 passwords.js
 s3data/uploads/*
+lambdas/findPicture/deploy/*
+passwords.py

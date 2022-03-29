@@ -73,7 +73,7 @@ link to useful info: https://google.github.io/mediapipe/solutions/hands
 models and there failure rates:
 KNeighborsClassifier = 20%
 RandomForestClassifier = 20%
-MLPClassifier(hidden_layer_sizes=(150,100,50), max_iter=300,activation = 'relu',solver='adam',random_state=1) = 9.4%
+MLPClassifier(hidden_layer_sizes=(150,100,50), max_iter=300,activation = 'relu',solver='adam',random_state=1) = 9.4% 13%
 MLPClassifier(hidden_layer_sizes=(150,100,50), max_iter=300,activation = 'relu',solver='lbfgs',random_state=1) = 12.820512820512814 or 10.833333333333332
 DecisionTreeClassifier = 27
 MLPClassifier(hidden_layer_sizes=(150,100,50), max_iter=2000,activation = 'relu',solver='sgd',random_state=1) = 8.717948717948717
@@ -83,3 +83,25 @@ failure rate of video model
 12.5% 11% 14.5% 10% 11.8% 10% = MLPClassifier(hidden_layer_sizes=(150,100,50), max_iter=2000,activation = 'relu',solver='lbfgs',random_state=1)
 
 Joshua Beckman is right handed
+
+
+
+
+lamda_function.py
+import json
+
+def lambda_handler(event, context):
+    # TODO implement
+
+    print(f"the event is {event}")
+    landmarks = event['body']
+    print(landmarks)
+
+
+    return {
+        'statusCode': 200,
+        'body': json.dumps({"bestGuess": "f"}),
+        'headers': {
+            "Access-Control-Allow-Origin" : "*",
+        }
+    }
