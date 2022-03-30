@@ -7,3 +7,6 @@ docker build -t find-picture .
 aws ecr get-login-password --region us-east-1 --profile mcherm-genevieve | docker login --username AWS --password-stdin 537053210946.dkr.ecr.us-east-1.amazonaws.com
 docker tag find-picture:latest 537053210946.dkr.ecr.us-east-1.amazonaws.com/find-picture:latest
 docker push 537053210946.dkr.ecr.us-east-1.amazonaws.com/find-picture:latest
+
+# To test it as an API run this:
+#   curl -XPOST "https://ywpaxgg1if.execute-api.us-east-1.amazonaws.com/prod/find-picture" -H 'Content-Type: application/json' -d '{"body": "{\"abc\":234}"}'
