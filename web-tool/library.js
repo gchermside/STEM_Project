@@ -96,8 +96,7 @@ function canvasAsBlob(canvasElem) {
 
 
 function onVideoDataAvailable(blobEvent) {
-    const sureButtonsElem = document.getElementById("sureButtons")
-    sureButtonsElem.classList.remove("hidden")
+    saveVideoForFindOrCollect(landmarkList, blobEvent.data)
     globalLandmarkList = landmarkList;
     globalBlobEvent = blobEvent.data;
     landmarkList = null; // we saved it, so we don't need this data anymore
@@ -117,7 +116,7 @@ function getRandomId() {
 }
 
 
-function onHandsResults(handResults) {
+function onHandsResults(handResults, isFind) {
     // --- Draw the image onto the canvas ---
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElem.width, canvasElem.height);
@@ -145,38 +144,14 @@ function onHandsResults(handResults) {
     // --- If we need to, go ahead and save the data ---
     if (saveNextFrame) {
         saveNextFrame = false;
-        const sureButtonsElem = document.getElementById("sureButtons")
-        sureButtonsElem.classList.remove("hidden")
-        console.log("going to waitFOrBottuns")
-        globalHandResults = handResults;
-        globalImageAsBlob = imageAsBlob;
+        saveFrameForFindOrCollect(handResults, imageAsBlob);
+        console.log("going to waitForButtons")
     }
     if (recordingVideo) {
         landmarkList.push(handResults.multiHandLandmarks);
     }
 }
 
-
-function startCapture() {
-    console.log("clicked yes")
-    doCapture = "true";
-    const sureButtonsElem = document.getElementById("sureButtons");
-    sureButtonsElem.classList.add("hidden");
-    // Want to do this:
-    if(captureMode === "snapshot") {
-        saveSingleFrame(globalHandResults, globalImageAsBlob);
-    }
-    if(captureMode === "video") {
-        saveVideo(globalLandmarkList, globalBlobEvent);
-    }
-}
-
-function noCapture() {
-    console.log("clicked no")
-    doCapture = "false";
-    const sureButtonsElem = document.getElementById("sureButtons")
-    sureButtonsElem.classList.add("hidden")
-}
 
 
 

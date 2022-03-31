@@ -4,6 +4,7 @@ directory = "C:/Users/Genevieve/Documents/programming/STEM_Project/uploads"
 subDir = "2022-03-27T02_29_44.607Z-4963915"
 landmarks = readLandmark(directory, subDir)
 vector = toVectorandRegularize(landmarks)
+print(vector)
 if vector == []:
     print("dud")
 

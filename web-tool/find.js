@@ -1,6 +1,5 @@
 // ==== Constants ====
 const instructionsElem = document.getElementsByClassName('instructions')[0];
-const savedElem = document.getElementsByClassName('saving')[0];
 const videoElem = document.getElementsByClassName('input_video')[0];
 const canvasElem = document.getElementsByClassName('output_canvas')[0];
 const canvasCtx = canvasElem.getContext('2d');
@@ -50,12 +49,12 @@ function initializeControls() {
  * Call this function to make the UI temporarily something to the user
  * to indicate that a save was successful.
  */
-function showUserSaveHappened() {
-    savedElem.classList.add("showing");
-    setTimeout(function() {
-        savedElem.classList.remove("showing");
-    }, 1000)
-}
+// function showUserSaveHappened() {
+//     savedElem.classList.add("showing");
+//     setTimeout(function() {
+//         savedElem.classList.remove("showing");
+//     }, 1000)
+// }
 
 
 /*
@@ -79,6 +78,9 @@ function saveSingleFrame(handResults, imageAsBlob) {
             response.json()
                 .then(function(json){
                     console.log("I think the answer is: ", json.bestGuess);
+                    const guessElem = document.getElementById("guess")
+                    guessElem.innerText = json.bestGuess;
+                    guessElem.classList.remove("hidden");
                 });
         })
         .catch(function(err) {
@@ -170,6 +172,12 @@ function saveVideo(landmarkList, videoAsBlob) {
     // NOTE: the save hasn't happened yet, it is still going on. So we're lying to the user.
     showUserSaveHappened();
 }
+
+
+function saveFrameForFindOrCollect(handResults, imageAsBlob) {
+        saveSingleFrame(handResults, imageAsBlob);
+}
+
 
 
 // ==== MAIN FUNCTION ====

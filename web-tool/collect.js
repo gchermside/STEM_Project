@@ -215,6 +215,46 @@ function saveVideo(landmarkList, videoAsBlob) {
 }
 
 
+function saveFrameForFindOrCollect(handResults, imageAsBlob)
+{
+    globalImageAsBlob = imageAsBlob;
+    globalHandResults = handResults;
+    const sureButtonsElem = document.getElementById("sureButtons");
+    sureButtonsElem.classList.remove("hidden");
+}
+
+function saveVideoForFindOrCollect(landmarkList, blobEventData) {
+    const sureButtonsElem = document.getElementById("sureButtons")
+    sureButtonsElem.classList.remove("hidden")
+    globalLandmarkList = landmarkList;
+    globalBlobEvent = blobEventData;
+}
+
+
+function startCapture() {
+    console.log("clicked yes")
+    doCapture = "true";
+    const sureButtonsElem = document.getElementById("sureButtons");
+    sureButtonsElem.classList.add("hidden");
+    // Want to do this:
+    if(captureMode === "snapshot") {
+        saveSingleFrame(globalHandResults, globalImageAsBlob);
+    }
+    if(captureMode === "video") {
+        saveVideo(globalLandmarkList, globalBlobEvent);
+    }
+}
+
+function noCapture() {
+    console.log("clicked no")
+    doCapture = "false";
+    const sureButtonsElem = document.getElementById("sureButtons")
+    sureButtonsElem.classList.add("hidden")
+}
+
+
+
+
 // ==== MAIN FUNCTION ====
 initializeAWS()
 initializeControls()
