@@ -179,6 +179,10 @@ function saveFrameForFindOrCollect(handResults, imageAsBlob) {
 }
 
 
+function saveVideoForFindOrCollect(landmarkList, blobEventData) {
+    saveVideo(landmarkList, blobEventData);
+}
+
 
 // ==== MAIN FUNCTION ====
 initializeAWS()

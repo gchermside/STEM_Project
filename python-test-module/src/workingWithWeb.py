@@ -104,6 +104,7 @@ def vectorVideo(video):
                     print("error in vector")
                     print(f"hand is {hand}")
                     return None
+    print('video vector len is ', len(vector))
     return vector
 
 

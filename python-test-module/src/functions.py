@@ -142,59 +142,59 @@ def findVideo(video, storage):
     return words
 
 
-def regularlizeVideo(video):
-    NUM_OF_FRAMES = 15
-    FRACTION_FOR_VIDEO_HANDEDNESS = 0.75
-    newVideo = []
-    frames1 = 0
-    frames2 = 0
-    if len(video) < 5:
-        return None
-    for frame in video:
-        if len(frame) == 0:
-            print("empty frame")
-        elif len(frame) == 1:
-            frames1 += 1
-        else:
-            print("two hands")
-            frames2 += 1
-    if frames1/len(video) > FRACTION_FOR_VIDEO_HANDEDNESS:
-        #This is a one handed sign
-        fractions = []
-        indexes = []
-        for index in range(0, len(video)):
-            if len(video[index]) == 1: # if exactly one hand
-                indexes.append(index)
-        length = indexes[-1] - indexes[0] + 1
-        for index in indexes:
-            fractions.append((index-indexes[0])/(length-1))
-        assert fractions[0] == 0 and fractions[-1] == 1
-        for num in range(0, NUM_OF_FRAMES):
-            d = num/(NUM_OF_FRAMES-1)
-            assert 0 <= d <= 1
-            for frameNum in range(0, len(fractions)):
-                if d == fractions[frameNum]:
-                    newVideo.append(video[indexes[frameNum]])
-                    break
-                elif d < fractions[frameNum]:
-                    assert frameNum > 0
-                    hand1 = video[indexes[frameNum-1]][0]
-                    hand2 = video[indexes[frameNum]][0]
-                    percent = (d-fractions[frameNum-1])/(fractions[frameNum] - fractions[frameNum-1])
-                    newHand = interpolateHand(hand1, hand2, percent)
-                    newVideo.append([newHand])
-                    break
-            else:
-                assert False
-        assert len(newVideo) == NUM_OF_FRAMES
-        return newVideo
-
-    elif frames2 >= frames1:
-        # this is a two handed sign
-        print("not using two handed signs yet")
-    else:
-        print("this sign is ambiguous, will use later")
-    return None
+# def regularlizeVideo(video):
+#     NUM_OF_FRAMES = 15
+#     FRACTION_FOR_VIDEO_HANDEDNESS = 0.75
+#     newVideo = []
+#     frames1 = 0
+#     frames2 = 0
+#     if len(video) < 5:
+#         return None
+#     for frame in video:
+#         if len(frame) == 0:
+#             print("empty frame")
+#         elif len(frame) == 1:
+#             frames1 += 1
+#         else:
+#             print("two hands")
+#             frames2 += 1
+#     if frames1/len(video) > FRACTION_FOR_VIDEO_HANDEDNESS:
+#         #This is a one handed sign
+#         fractions = []
+#         indexes = []
+#         for index in range(0, len(video)):
+#             if len(video[index]) == 1: # if exactly one hand
+#                 indexes.append(index)
+#         length = indexes[-1] - indexes[0] + 1
+#         for index in indexes:
+#             fractions.append((index-indexes[0])/(length-1))
+#         assert fractions[0] == 0 and fractions[-1] == 1
+#         for num in range(0, NUM_OF_FRAMES):
+#             d = num/(NUM_OF_FRAMES-1)
+#             assert 0 <= d <= 1
+#             for frameNum in range(0, len(fractions)):
+#                 if d == fractions[frameNum]:
+#                     newVideo.append(video[indexes[frameNum]])
+#                     break
+#                 elif d < fractions[frameNum]:
+#                     assert frameNum > 0
+#                     hand1 = video[indexes[frameNum-1]][0]
+#                     hand2 = video[indexes[frameNum]][0]
+#                     percent = (d-fractions[frameNum-1])/(fractions[frameNum] - fractions[frameNum-1])
+#                     newHand = interpolateHand(hand1, hand2, percent)
+#                     newVideo.append([newHand])
+#                     break
+#             else:
+#                 assert False
+#         assert len(newVideo) == NUM_OF_FRAMES
+#         return newVideo
+#
+#     elif frames2 >= frames1:
+#         # this is a two handed sign
+#         print("not using two handed signs yet")
+#     else:
+#         print("this sign is ambiguous, will use later")
+#     return None
 
 
 def interpolateCoordinate(p1, p2, percent):
@@ -220,3 +220,80 @@ def interpolateHand(hand1, hand2, percent):
             print(f"point is {p}")
     return newHand
 
+def doHand(NUM_OF_FRAMES, video, hand1or2, newVideoStart):
+    newVideo = newVideoStart
+    newVideoSpot = 0
+    fractions = []
+    indexes = []
+    for index in range(0, len(video)):
+        if len(video[index]) -1 >= hand1or2:
+            indexes.append(index)
+    length = indexes[-1] - indexes[0] + 1
+    for index in indexes:
+        fractions.append((index-indexes[0])/(length-1))
+    assert fractions[0] == 0 and fractions[-1] == 1
+    print("indexes ", indexes)
+    print("fractions is ", fractions)
+    for num in range(0, NUM_OF_FRAMES):
+        d = num/(NUM_OF_FRAMES-1)
+        print("d is ",d)
+        assert 0 <= d <= 1
+        for frameNum in range(0, len(fractions)):
+            if d == fractions[frameNum]:
+                newHand = video[indexes[frameNum]][hand1or2]
+                print("newHand is ", newHand)
+                newVideo[newVideoSpot].append(newHand)
+                print("newVideoSpot", newVideoSpot)
+                newVideoSpot += 1
+                break
+            elif d < fractions[frameNum]:
+                assert frameNum > 0
+                hand1 = video[indexes[frameNum-1]][hand1or2]
+                hand2 = video[indexes[frameNum]][hand1or2]
+                percent = (d-fractions[frameNum-1])/(fractions[frameNum] - fractions[frameNum-1])
+                newHand = interpolateHand(hand1, hand2, percent)
+                newVideo[newVideoSpot].append(newHand)
+                print("newVideoSpot", newVideoSpot)
+                newVideoSpot += 1
+                break
+        else:
+            assert False
+    assert len(newVideo) == NUM_OF_FRAMES
+    return newVideo
+
+
+
+def regularlizeVideo(video):
+    NUM_OF_FRAMES = 15
+    newVideo = []
+    for num in range(0, NUM_OF_FRAMES):
+        newVideo.append([])
+    print("new video is ", newVideo)
+    FRACTION_FOR_VIDEO_HANDEDNESS = 0.75
+    frames1 = 0
+    frames2 = 0
+    if len(video) < 5:
+        return None
+    for frame in video:
+        if len(frame) == 0:
+            print("empty frame")
+        elif len(frame) == 1:
+            frames1 += 1
+        else:
+            print("two hands")
+            frames2 += 1
+    if frames1/len(video) > FRACTION_FOR_VIDEO_HANDEDNESS:
+        #This is a one handed sign
+        newVideo = doHand(NUM_OF_FRAMES, video, 0, newVideo)
+        return newVideo
+
+    elif frames2 >= frames1:
+        # this is a two handed sign
+        newVideo = doHand(NUM_OF_FRAMES, video, 0, newVideo)
+        print("first new video ", newVideo)
+        newVideo = doHand(NUM_OF_FRAMES, video, 1, newVideo)
+        print("finished video is ", newVideo)
+        return newVideo
+    else:
+        print("this sign is ambiguous, will use later")
+        return None
