@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'Perform lookup of a one handed video'
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 10
+
+Resources:
+  FindPicture:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Architectures:
+        - x86_64
+      MemorySize: 1024
+      Role: arn:aws:iam::537053210946:role/service-role/findPicture-role-9meqcifa
+      Events:
+        FindPicture:
+          Type: Api
+          Properties:
+            Path: /find-video1
+            Method: post
+
+Outputs:
+  FindPicture:
+    Description: API Gateway endpoint URL for Prod stage for findVideo1 function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/find-video1/

@@ -171,14 +171,31 @@ def readInData():
             jsonReadableLandmarks = json.load(landmarkFile)
             with open(infoJson, "r") as infoFile:
                 jsonReadableInfo = json.load(infoFile)
-                signName = jsonReadableInfo['signName']
-                signName = signName.lower()
-                try:
-                    if jsonReadableInfo['isVideo'] == True:
-                        addNewThing(signName, jsonReadableLandmarks, videoHandDic)
-                    else:
-                        addNewThing(signName, jsonReadableLandmarks, imageHandDic)
-                except:
-                    thisIsAPlaceHolder = 0
+                if "  " in jsonReadableInfo['signName']:
+                    print("bad name is ", jsonReadableInfo['signName'], ")")
+                    print("bad file is ", infoJson)
+                    print("bad username is ", jsonReadableInfo['userName'])
+                    if jsonReadableInfo['userName'] == "":
+                        print("no username")
+                        print("is video is ", jsonReadableInfo["isVideo"])
+                        print("may capture data is ", jsonReadableInfo["mayCaptureData"])
+                    if jsonReadableInfo['userName'] == "Joshua Beckman":
+                        signName = jsonReadableInfo['signName'].strip().lower()
+                        addSign(jsonReadableInfo, signName, jsonReadableLandmarks, videoHandDic, imageHandDic)
+                    if jsonReadableInfo["userName"] == "Kurt Metz":
+                        print("is video is ", jsonReadableInfo["isVideo"])
+                else:
+                    signName = jsonReadableInfo['signName']
+                    signName = signName.lower()
+                    addSign(jsonReadableInfo, signName, jsonReadableLandmarks, videoHandDic, imageHandDic)
     return imageHandDic, videoHandDic
 
+
+def addSign(jsonReadableInfo, signName, jsonReadableLandmarks, videoHandDic, imageHandDic):
+    try:
+        if jsonReadableInfo['isVideo'] == True:
+            addNewThing(signName, jsonReadableLandmarks, videoHandDic)
+        else:
+            addNewThing(signName, jsonReadableLandmarks, imageHandDic)
+    except:
+        thisIsAPlaceHolder = 0
