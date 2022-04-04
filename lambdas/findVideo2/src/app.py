@@ -5,6 +5,23 @@ import sklearn
 model = None
 
 
+def vectorVideo(video):
+    vector = []
+    for frame in video:
+        for hand in frame:
+            for point in hand:
+                try:
+                    vector.append(point['x'])
+                    vector.append(point['y'])
+                    vector.append(point['z'])
+                except:
+                    print("error in vector")
+                    print(f"hand is {hand}")
+                    return None
+    print('video vector len is ', len(vector))
+    return vector
+
+
 
 def interpolateCoordinate(p1, p2, percent):
     return ((p2-p1) * percent) + p1
@@ -112,7 +129,8 @@ def main(event):
 
     video = json.loads(event['body'])
     print("landmarks", video)
-    vector = regularlizeVideo(video)
+    regVid = regularlizeVideo(video)
+    vector = vectorVideo(regVid)
     print("vector", vector)
 
     # Load pickled model from file and unpickle, if it isn't already loaded

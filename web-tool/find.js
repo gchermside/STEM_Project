@@ -119,11 +119,11 @@ function saveVideo(landmarkList, videoAsBlob) {
     // --- Write the landmarks ---
     const dataAsAString = JSON.stringify(landmarkList);
     //fetch API here
-    const url = "ladalada";
+    let url;
     if (isOneHanded) {
-        const url = "https://ywpaxgg1if.execute-api.us-east-1.amazonaws.com/prod/find-video1";
+        url = "https://ywpaxgg1if.execute-api.us-east-1.amazonaws.com/prod/find-video1";
     } else {
-        const url = "https://ywpaxgg1if.execute-api.us-east-1.amazonaws.com/prod/find-video2";
+        url = "https://ywpaxgg1if.execute-api.us-east-1.amazonaws.com/prod/find-video2";
     }
     const fetchSettings = {
         method: "POST",
