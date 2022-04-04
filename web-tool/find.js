@@ -9,6 +9,7 @@ let s3; // gets set by initializeAWS()
 let readyToCapture = false;
 let captureMode = "snapshot"; // either "snapshot" or "video"
 let isRightHanded = true;
+let isOneHanded = true;
 let mayCaptureData = false;
 let saveNextFrame = false; // used in snapshot mode
 let recordingVideo = false; // used in video mode
@@ -39,6 +40,12 @@ function initializeControls() {
     };
     document.getElementById("left").onclick = function() {
         isRightHanded = false;
+    }
+    document.getElementById("one").onclick = function() {
+        isOneHanded = true;
+    };
+    document.getElementById("two").onclick = function() {
+        isOneHanded = false;
     }
 }
 
@@ -109,70 +116,37 @@ function saveSingleFrame(handResults, imageAsBlob) {
  * Function called after a single frame has been taken.
  */
 function saveVideo(landmarkList, videoAsBlob) {
-    // --- Select a random ID to use ---
-    const randomId = getRandomId();
-    console.log(`saving to id ${randomId}`);
-
-    // --- Write the landmarkList ---
+    // --- Write the landmarks ---
     const dataAsAString = JSON.stringify(landmarkList);
-    const uploadInstructionsForLandmarkList = {
-        Bucket: 'asl-dictionary-uploads',
-        Key: `uploads/${randomId}/landmarks.json`,
-        ContentType: "application/json",
-        Body: dataAsAString
-    };
-    s3.upload(uploadInstructionsForLandmarkList, function(err) {
-        if (err) {
-            throw err;
-        }
-        console.log("finished saving landmark");
-    });
-
-    // --- Write the info ---
-    userName = document.getElementById("name").value
-    signName = document.getElementById("sign").value
-    let isVideo;
-    if(captureMode === "snapshot") {
-        isVideo = false;
+    //fetch API here
+    const url = "ladalada";
+    if (isOneHanded) {
+        const url = "https://ywpaxgg1if.execute-api.us-east-1.amazonaws.com/prod/find-video1";
     } else {
-        isVideo = true;
+        const url = "https://ywpaxgg1if.execute-api.us-east-1.amazonaws.com/prod/find-video2";
     }
-    const jsonInfo = JSON.stringify({isRightHanded: isRightHanded, userName: userName, signName: signName, isVideo: isVideo, mayCaptureData: mayCaptureData})
-    const uploadInstructionsForInfo = {
-        Bucket: 'asl-dictionary-uploads',
-        Key: `uploads/${randomId}/info.json`,
-        ContentType: "application/json", //subtly important
-        Body: jsonInfo
+    const fetchSettings = {
+        method: "POST",
+        mode: "cors",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: dataAsAString
     };
-    s3.upload(uploadInstructionsForInfo, function(err) {
-        if (err) {
-            throw err;
-        }
-        console.log("finished saving info");
-    });
-
-    // --- Write the video ---
-    if(mayCaptureData === true) {
-        console.log("about to save video");
-        const uploadInstructionsForVideo = {
-            Bucket: 'asl-dictionary-uploads',
-            Key: `uploads/${randomId}/video.webm`,
-            ContentType: "video/webm",
-            Body: videoAsBlob
-        };
-        s3.upload(uploadInstructionsForVideo, function(err) {
-            if (err) {
-                throw err;
-            }
-            console.log("finished saving video");
+    fetch(url, fetchSettings)
+        .then(function (response) {
+            response.json()
+                .then(function (json) {
+                    console.log("I think the answer is: ", json.bestGuess);
+                    const guessElem = document.getElementById("guess")
+                    guessElem.innerText = json.bestGuess;
+                    guessElem.classList.remove("hidden");
+                });
+        })
+        .catch(function (err) {
+            console.log("Error fetching", err);
         });
-    }
-
-    // --- Perform animation ---
-    // NOTE: the save hasn't happened yet, it is still going on. So we're lying to the user.
-    showUserSaveHappened();
 }
-
 
 function saveFrameForFindOrCollect(handResults, imageAsBlob) {
         saveSingleFrame(handResults, imageAsBlob);
