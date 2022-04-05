@@ -285,7 +285,7 @@ def regularlizeVideo(video):
     if frames1/len(video) > FRACTION_FOR_VIDEO_HANDEDNESS:
         #This is a one handed sign
         newVideo = doHand(NUM_OF_FRAMES, video, 0, newVideo)
-        return newVideo
+        return regularizeAndVectorVideo(newVideo)
 
     elif frames2 >= frames1:
         # this is a two handed sign
@@ -293,7 +293,7 @@ def regularlizeVideo(video):
         print("first new video ", newVideo)
         newVideo = doHand(NUM_OF_FRAMES, video, 1, newVideo)
         print("finished video is ", newVideo)
-        return newVideo
+        return regularizeAndVectorVideo(newVideo)
     else:
         print("this sign is ambiguous, will use later")
         return None
