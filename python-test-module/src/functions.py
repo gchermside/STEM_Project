@@ -1,5 +1,4 @@
 import array
-import numpy
 import math
 from numpy import array
 
@@ -297,3 +296,50 @@ def regularlizeVideo(video):
     else:
         print("this sign is ambiguous, will use later")
         return None
+
+def regularizeAndVectorVideo(video):
+    videoVector = []
+    for frame in video:
+        for hand in frame:
+            newHand = regularizeJsonHand(hand)
+            handVector = vectorVideo(newHand)
+            handVector.append(hand[0]["x"])
+            handVector.append(hand[0]["y"])
+            handVector.append(hand[0]["z"])
+            videoVector.append(handVector)
+    return videoVector
+
+
+
+def regularizeJsonHand(originalHand):
+    hand = originalHand
+    xShift = hand[0]["x"]
+    yShift = hand[0]["y"]
+    zShift = hand[0]["z"]
+    for lm in hand:
+        lm["x"] = lm["x"] - xShift
+        lm["y"] = lm["y"] - yShift
+        lm["z"] = lm["z"] - zShift
+    p1 = hand[1]
+    mult = 1/(((p1["x"])**2 + (p1["y"])**2 + (p1["z"])**2)**(1/2))
+    for lm in hand:
+        lm["x"] = lm["x"] * mult
+        lm["y"] = lm["y"] * mult
+        lm["z"] = lm["z"] * mult
+    return hand
+
+def vectorVideo(video):
+    vector = []
+    for frame in video:
+        for hand in frame:
+            for point in hand:
+                try:
+                    vector.append(point['x'])
+                    vector.append(point['y'])
+                    vector.append(point['z'])
+                except:
+                    print("error in vector")
+                    print(f"hand is {hand}")
+                    return None
+    print('video vector len is ', len(vector))
+    return vector
