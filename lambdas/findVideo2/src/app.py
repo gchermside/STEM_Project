@@ -5,24 +5,6 @@ import sklearn
 model = None
 
 
-def vectorVideo(video):
-    vector = []
-    for frame in video:
-        for hand in frame:
-            for point in hand:
-                try:
-                    vector.append(point['x'])
-                    vector.append(point['y'])
-                    vector.append(point['z'])
-                except:
-                    print("error in vector")
-                    print(f"hand is {hand}")
-                    return None
-    print('video vector len is ', len(vector))
-    return vector
-
-
-
 def interpolateCoordinate(p1, p2, percent):
     return ((p2-p1) * percent) + p1
 
@@ -45,7 +27,6 @@ def interpolateHand(hand1, hand2, percent):
         if p<-20 or p>100:
             print(f"point is {p}")
     return newHand
-
 
 def doHand(NUM_OF_FRAMES, video, hand1or2, newVideoStart):
     newVideo = newVideoStart
@@ -89,6 +70,7 @@ def doHand(NUM_OF_FRAMES, video, hand1or2, newVideoStart):
     return newVideo
 
 
+
 def regularlizeVideo(video):
     NUM_OF_FRAMES = 15
     newVideo = []
@@ -111,7 +93,7 @@ def regularlizeVideo(video):
     if frames1/len(video) > FRACTION_FOR_VIDEO_HANDEDNESS:
         #This is a one handed sign
         newVideo = doHand(NUM_OF_FRAMES, video, 0, newVideo)
-        return newVideo
+        return regularizeAndVectorVideo(newVideo)
 
     elif frames2 >= frames1:
         # this is a two handed sign
@@ -119,30 +101,77 @@ def regularlizeVideo(video):
         print("first new video ", newVideo)
         newVideo = doHand(NUM_OF_FRAMES, video, 1, newVideo)
         print("finished video is ", newVideo)
-        return newVideo
+        return regularizeAndVectorVideo(newVideo)
     else:
         print("this sign is ambiguous, will use later")
         return None
+
+def regularizeAndVectorVideo(video):
+    videoVector = []
+    for frame in video:
+        for hand in frame:
+            handVector = []
+            handVector.append(hand[0]["x"])
+            handVector.append(hand[0]["y"])
+            handVector.append(hand[0]["z"])
+            newHand = regularizeJsonHand(hand)
+            vector = vectorHand(newHand)
+            for num in vector:
+                handVector.append(num)
+            for thing in handVector:
+                videoVector.append(thing)
+    return videoVector
+
+
+
+def regularizeJsonHand(originalHand):
+    hand = originalHand
+    xShift = hand[0]["x"]
+    yShift = hand[0]["y"]
+    zShift = hand[0]["z"]
+    for lm in hand:
+        lm["x"] = lm["x"] - xShift
+        lm["y"] = lm["y"] - yShift
+        lm["z"] = lm["z"] - zShift
+    p1 = hand[1]
+    mult = 1/(((p1["x"])**2 + (p1["y"])**2 + (p1["z"])**2)**(1/2))
+    for lm in hand:
+        lm["x"] = lm["x"] * mult
+        lm["y"] = lm["y"] * mult
+        lm["z"] = lm["z"] * mult
+    return hand
+
+def vectorHand(hand):
+    vector = []
+    for point in hand:
+        try:
+            vector.append(point['x'])
+            vector.append(point['y'])
+            vector.append(point['z'])
+        except:
+            print("error in vector")
+            print(f"hand is {hand}")
+            return None
+    print('video vector len is ', len(vector))
+    return vector
 
 def main(event):
     global model
 
     video = json.loads(event['body'])
-    print("landmarks", video)
-    regVid = regularlizeVideo(video)
-    vector = vectorVideo(regVid)
+    print("video", video)
+    vector = regularlizeVideo(video)
     print("vector", vector)
 
     # Load pickled model from file and unpickle, if it isn't already loaded
     if model is None:
-        with open("video2.pkl", 'rb') as f:
+        with open("video1.pkl", 'rb') as f:
             model = pickle.load(f)
 
     predictions = model.predict([vector])
     print("predictions:", predictions)
     prediction = predictions[0]
     return prediction
-
 
 
 def lambda_handler(event, context):

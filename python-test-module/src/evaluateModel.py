@@ -1,5 +1,4 @@
 from workingWithWeb import *
-import functions
 
 imageHandDic, videoHandDicNotRegularized = readInData()
 print(f"length of old dic {len(videoHandDicNotRegularized)}")
@@ -7,23 +6,13 @@ num = 0
 for value in videoHandDicNotRegularized.values():
     for video in value:
         num += 1
-print(f"num is {num}")
+print(f"total number of videos {num}")
+LEN_OF_ONE_HANDED_VECTOR = 990
 vorp = input("Do you want to test video or picture?(type v or p): ")
 if vorp == "v":
     # training model for video
     print("ok")
-    videoHandDic1 = {}
-    videoHandDic2 = {}
-    for key, value in videoHandDicNotRegularized.items():
-        for video in value:
-            newVideo = functions.regularlizeVideo(video)
-            if newVideo is not None:
-                if len(newVideo[0]) == 1:
-                    functions.addNewThing(key, newVideo, videoHandDic1)
-                elif len(newVideo[0]) == 2:
-                    functions.addNewThing(key, newVideo, videoHandDic2)
-                else:
-                    print("this shouldn't happen")
+    videoHandDic1, videoHandDic2 = buildVideo1and2dics(videoHandDicNotRegularized, LEN_OF_ONE_HANDED_VECTOR)
     # machine learning
     X, y = readVideoDic(videoHandDic1)
     print(y)

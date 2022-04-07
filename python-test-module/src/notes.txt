@@ -81,6 +81,7 @@ MLPClassifier(hidden_layer_sizes=(150,100,50), max_iter=2000,activation = 'relu'
 failure rate of video model
 10% = MLPClassifier(hidden_layer_sizes=(150,100,50), max_iter=2000,activation = 'relu',solver='adam',random_state=1)
 12.5% 11% 14.5% 10% 11.8% 10% = MLPClassifier(hidden_layer_sizes=(150,100,50), max_iter=2000,activation = 'relu',solver='lbfgs',random_state=1)
+now 16% inacurrate for one hand and 35 for two
 
 Joshua Beckman is right handed
 

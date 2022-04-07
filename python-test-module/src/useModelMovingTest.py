@@ -1,18 +1,3 @@
-from workingWithWeb import *
-
-directory = "C:/Users/Genevieve/Documents/programming/STEM_Project/uploads"
-subDir = "2022-03-27T02_29_44.607Z-4963915"
-landmarks = readLandmark(directory, subDir)
-vector = toVectorandRegularize(landmarks)
-print(vector)
-if vector == []:
-    print("dud")
-
-
-model = loadModel("picture")
-prediction = model.predict([vector])
-print(prediction)
-
 # C:\Users\Genevieve\Documents\programming\STEM_Project\uploads\2022-03-27T02_15_21.496Z-5392117
 # C:/Users/Genevieve/Documents/programming/STEM_Project/s3Data/uploads/2022-03-27T02_15_21.496Z-5392117/landmarks.json
 import json
@@ -20,23 +5,6 @@ import pickle
 import sklearn
 
 model = None
-
-
-def vectorVideo(video):
-    vector = []
-    for frame in video:
-        for hand in frame:
-            for point in hand:
-                try:
-                    vector.append(point['x'])
-                    vector.append(point['y'])
-                    vector.append(point['z'])
-                except:
-                    print("error in vector")
-                    print(f"hand is {hand}")
-                    return None
-    print('video vector len is ', len(vector))
-    return vector
 
 
 
@@ -62,7 +30,6 @@ def interpolateHand(hand1, hand2, percent):
         if p<-20 or p>100:
             print(f"point is {p}")
     return newHand
-
 
 def doHand(NUM_OF_FRAMES, video, hand1or2, newVideoStart):
     newVideo = newVideoStart
@@ -106,6 +73,7 @@ def doHand(NUM_OF_FRAMES, video, hand1or2, newVideoStart):
     return newVideo
 
 
+
 def regularlizeVideo(video):
     NUM_OF_FRAMES = 15
     newVideo = []
@@ -145,12 +113,16 @@ def regularizeAndVectorVideo(video):
     videoVector = []
     for frame in video:
         for hand in frame:
-            newHand = regularizeJsonHand(hand)
-            handVector = vectorVideo(newHand)
+            handVector = []
             handVector.append(hand[0]["x"])
             handVector.append(hand[0]["y"])
             handVector.append(hand[0]["z"])
-            videoVector.append(handVector)
+            newHand = regularizeJsonHand(hand)
+            vector = vectorHand(newHand)
+            for num in vector:
+                handVector.append(num)
+            for thing in handVector:
+                videoVector.append(thing)
     return videoVector
 
 
@@ -172,6 +144,19 @@ def regularizeJsonHand(originalHand):
         lm["z"] = lm["z"] * mult
     return hand
 
+def vectorHand(hand):
+    vector = []
+    for point in hand:
+        try:
+            vector.append(point['x'])
+            vector.append(point['y'])
+            vector.append(point['z'])
+        except:
+            print("error in vector")
+            print(f"hand is {hand}")
+            return None
+    print('video vector len is ', len(vector))
+    return vector
 
 def main(event):
     global model
@@ -190,7 +175,6 @@ def main(event):
     print("predictions:", predictions)
     prediction = predictions[0]
     return prediction
-
 
 
 # def lambda_handler(event, context):

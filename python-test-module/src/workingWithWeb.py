@@ -12,26 +12,6 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 
 
-# this function points moves the hand so the wrist is at 0,0 and makes it a consistant
-# porportion(the length between point 0 and 1 will always be the same on hands)
-def regularizeJsonHand(originalHand):
-    hand = originalHand
-    xShift = hand[0]["x"]
-    yShift = hand[0]["y"]
-    zShift = hand[0]["z"]
-    for lm in hand:
-        lm["x"] = lm["x"] - xShift
-        lm["y"] = lm["y"] - yShift
-        lm["z"] = lm["z"] - zShift
-    p1 = hand[1]
-    mult = 1/(((p1["x"])**2 + (p1["y"])**2 + (p1["z"])**2)**(1/2))
-    for lm in hand:
-        lm["x"] = lm["x"] * mult
-        lm["y"] = lm["y"] * mult
-        lm["z"] = lm["z"] * mult
-    return hand
-
-
 
 def addNewThing(word, thing, dictionary):
     word.lower()
@@ -49,7 +29,7 @@ def toVectorandRegularize(image):
     vector = []
     if len(image) == 1:
         for unRegHand in image:
-            hand = regularizeJsonHand(unRegHand)
+            hand = functions.regularizeJsonHand(unRegHand)
             for points in hand:
                 vector.append(points["x"])
                 vector.append(points["y"])
@@ -77,11 +57,11 @@ def readPictureDic(dic):
     return X, y
 
 def readVideoDic(dic):
+    print("reading video dic")
     X = [] #data
     y = [] #targets
     for key, items in dic.items():
-        for item in items:
-            vector = vectorVideo(item)
+        for vector in items:
             if vector == [] or y == "" or vector == None:
                 print("dud, skipping")
             else:
@@ -199,3 +179,20 @@ def addSign(jsonReadableInfo, signName, jsonReadableLandmarks, videoHandDic, ima
             addNewThing(signName, jsonReadableLandmarks, imageHandDic)
     except:
         thisIsAPlaceHolder = 0
+
+
+def buildVideo1and2dics(videoHandDicNotRegularized, LEN_OF_ONE_HANDED_VECTOR):
+    videoHandDic1 = {}
+    videoHandDic2 = {}
+    for key, value in videoHandDicNotRegularized.items():
+        for video in value:
+            newVideo = regularlizeVideo(video)
+            if newVideo is not None:
+                print("length", len(newVideo))
+                if len(newVideo) == LEN_OF_ONE_HANDED_VECTOR:
+                    addNewThing(key, newVideo, videoHandDic1)
+                elif len(newVideo) == LEN_OF_ONE_HANDED_VECTOR*2:
+                    addNewThing(key, newVideo, videoHandDic2)
+                else:
+                    print("this shouldn't happen")
+    return videoHandDic1, videoHandDic2
