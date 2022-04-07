@@ -7,6 +7,13 @@ import sklearn
 model = None
 
 
+def readLandmark(directory, subDir):
+    landmarksJson = directory+"/"+subDir+"/landmarks.json"
+    with open(landmarksJson, 'r') as landmarkFile:
+        return json.load(landmarkFile)
+
+
+
 
 def interpolateCoordinate(p1, p2, percent):
     return ((p2-p1) * percent) + p1
@@ -176,6 +183,13 @@ def main(event):
     prediction = predictions[0]
     return prediction
 
+directory = "C:/Users/Genevieve/Documents/programming/STEM_Project/uploads"
+subDir = "2022-04-03T22_18_35.977Z-9652135"
+landmarks = readLandmark(directory, subDir)
+event = {
+    "body": landmarks
+}
+print(main(event))
 
 # def lambda_handler(event, context):
 #
