@@ -2,7 +2,7 @@
 # C:/Users/Genevieve/Documents/programming/STEM_Project/s3Data/uploads/2022-03-27T02_15_21.496Z-5392117/landmarks.json
 import json
 import pickle
-import sklearn
+# import sklearn
 
 model = None
 
@@ -50,18 +50,13 @@ def doHand(NUM_OF_FRAMES, video, hand1or2, newVideoStart):
     for index in indexes:
         fractions.append((index-indexes[0])/(length-1))
     assert fractions[0] == 0 and fractions[-1] == 1
-    print("indexes ", indexes)
-    print("fractions is ", fractions)
     for num in range(0, NUM_OF_FRAMES):
         d = num/(NUM_OF_FRAMES-1)
-        print("d is ",d)
         assert 0 <= d <= 1
         for frameNum in range(0, len(fractions)):
             if d == fractions[frameNum]:
                 newHand = video[indexes[frameNum]][hand1or2]
-                print("newHand is ", newHand)
                 newVideo[newVideoSpot].append(newHand)
-                print("newVideoSpot", newVideoSpot)
                 newVideoSpot += 1
                 break
             elif d < fractions[frameNum]:
@@ -71,7 +66,6 @@ def doHand(NUM_OF_FRAMES, video, hand1or2, newVideoStart):
                 percent = (d-fractions[frameNum-1])/(fractions[frameNum] - fractions[frameNum-1])
                 newHand = interpolateHand(hand1, hand2, percent)
                 newVideo[newVideoSpot].append(newHand)
-                print("newVideoSpot", newVideoSpot)
                 newVideoSpot += 1
                 break
         else:
@@ -86,7 +80,6 @@ def regularlizeVideo(video):
     newVideo = []
     for num in range(0, NUM_OF_FRAMES):
         newVideo.append([])
-    print("new video is ", newVideo)
     FRACTION_FOR_VIDEO_HANDEDNESS = 0.75
     frames1 = 0
     frames2 = 0
@@ -108,10 +101,8 @@ def regularlizeVideo(video):
     elif frames2 >= frames1:
         # this is a two handed sign
         newVideo = doHand(NUM_OF_FRAMES, video, 0, newVideo)
-        print("first new video ", newVideo)
         newVideo = doHand(NUM_OF_FRAMES, video, 1, newVideo)
         print("finished video is ", newVideo)
-        return regularizeAndVectorVideo(newVideo)
     else:
         print("this sign is ambiguous, will use later")
         return None
@@ -175,7 +166,7 @@ def main(event):
 
     # Load pickled model from file and unpickle, if it isn't already loaded
     if model is None:
-        with open("video1.pkl", 'rb') as f:
+        with open("models/video1.pkl", 'rb') as f:
             model = pickle.load(f)
 
     predictions = model.predict([vector])
@@ -183,11 +174,13 @@ def main(event):
     prediction = predictions[0]
     return prediction
 
-directory = "C:/Users/Genevieve/Documents/programming/STEM_Project/uploads"
-subDir = "2022-04-03T22_18_35.977Z-9652135"
+directory = "C:/Users/Genevieve/Documents/programming/STEM_Project/s3Data/uploads"
+subDir = "2022-04-08T12_39_39.021Z-4315607"
 landmarks = readLandmark(directory, subDir)
+stringLandmarks = json.dumps(landmarks)
+print("landmarks ", landmarks)
 event = {
-    "body": landmarks
+    "body": stringLandmarks
 }
 print(main(event))
 

@@ -1,8 +1,16 @@
 import json
 import pickle
-import sklearn
+# import sklearn
 
 model = None
+
+
+def readLandmark(directory, subDir):
+    landmarksJson = directory+"/"+subDir+"/landmarks.json"
+    with open(landmarksJson, 'r') as landmarkFile:
+        return json.load(landmarkFile)
+
+
 
 
 def interpolateCoordinate(p1, p2, percent):
@@ -40,18 +48,13 @@ def doHand(NUM_OF_FRAMES, video, hand1or2, newVideoStart):
     for index in indexes:
         fractions.append((index-indexes[0])/(length-1))
     assert fractions[0] == 0 and fractions[-1] == 1
-    print("indexes ", indexes)
-    print("fractions is ", fractions)
     for num in range(0, NUM_OF_FRAMES):
         d = num/(NUM_OF_FRAMES-1)
-        print("d is ",d)
         assert 0 <= d <= 1
         for frameNum in range(0, len(fractions)):
             if d == fractions[frameNum]:
                 newHand = video[indexes[frameNum]][hand1or2]
-                print("newHand is ", newHand)
                 newVideo[newVideoSpot].append(newHand)
-                print("newVideoSpot", newVideoSpot)
                 newVideoSpot += 1
                 break
             elif d < fractions[frameNum]:
@@ -61,7 +64,6 @@ def doHand(NUM_OF_FRAMES, video, hand1or2, newVideoStart):
                 percent = (d-fractions[frameNum-1])/(fractions[frameNum] - fractions[frameNum-1])
                 newHand = interpolateHand(hand1, hand2, percent)
                 newVideo[newVideoSpot].append(newHand)
-                print("newVideoSpot", newVideoSpot)
                 newVideoSpot += 1
                 break
         else:
@@ -76,7 +78,6 @@ def regularlizeVideo(video):
     newVideo = []
     for num in range(0, NUM_OF_FRAMES):
         newVideo.append([])
-    print("new video is ", newVideo)
     FRACTION_FOR_VIDEO_HANDEDNESS = 0.75
     frames1 = 0
     frames2 = 0
@@ -98,10 +99,8 @@ def regularlizeVideo(video):
     elif frames2 >= frames1:
         # this is a two handed sign
         newVideo = doHand(NUM_OF_FRAMES, video, 0, newVideo)
-        print("first new video ", newVideo)
         newVideo = doHand(NUM_OF_FRAMES, video, 1, newVideo)
         print("finished video is ", newVideo)
-        return regularizeAndVectorVideo(newVideo)
     else:
         print("this sign is ambiguous, will use later")
         return None
