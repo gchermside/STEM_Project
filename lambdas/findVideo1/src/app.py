@@ -163,6 +163,7 @@ def main(event):
     print("vector", vector)
 
     # Load pickled model from file and unpickle, if it isn't already loaded
+
     if model is None:
         with open("video1.pkl", 'rb') as f:
             model = pickle.load(f)
@@ -185,6 +186,13 @@ def lambda_handler(event, context):
             }
         }
     except BaseException as err:
+        print({
+            'statusCode': 500,
+            'body': '"' + str(err) + '"',
+            'headers': {
+                "Access-Control-Allow-Origin" : "*",
+            }
+        })
         return {
             'statusCode': 500,
             'body': '"' + str(err) + '"',
