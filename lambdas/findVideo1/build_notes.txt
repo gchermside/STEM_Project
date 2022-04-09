@@ -1,4 +1,5 @@
 # cd lambdas/findVideo1/src
+cp ../../../python-test-module/src/library.py .
 docker build -t find-video1 .
 # To test it locally run these 2 lines in separate command windows:
 #   docker run -p 9000:8080 find-video1

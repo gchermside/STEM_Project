@@ -1,14 +1,11 @@
 import json
-import pickle
-import sklearn
-from library import *
 
-model = None
+def readLandmark(directory, subDir):
+    landmarksJson = directory+"/"+subDir+"/landmarks.json"
+    with open(landmarksJson, 'r') as landmarkFile:
+        return json.load(landmarkFile)
 
 
-class BadVideoException(Exception):
-    def __init__(self, message):
-        super().__init__(self, message)
 
 
 def interpolateCoordinate(p1, p2, percent):
@@ -72,8 +69,6 @@ def doHand(NUM_OF_FRAMES, video, hand1or2, newVideoStart):
 
 
 def regularlizeVideo(video):
-    """takes in video(one or two hands),
-    returns the regularized and vectored video or None if the video is too short or has too many one and two handed frames"""
     NUM_OF_FRAMES = 15
     newVideo = []
     for num in range(0, NUM_OF_FRAMES):
@@ -87,7 +82,6 @@ def regularlizeVideo(video):
         if len(frame) == 0:
             print("empty frame")
         elif len(frame) == 1:
-            print("one hand")
             frames1 += 1
         else:
             print("two hands")
@@ -155,62 +149,3 @@ def vectorHand(hand):
             return None
     print('video vector len is ', len(vector))
     return vector
-
-def main(event):
-    """returns the predicted word or raises exception Bad Video"""
-    global model
-
-    video = json.loads(event['body'])
-    print("video", video)
-    vector = regularlizeVideo(video)
-    print("vector", vector)
-    if vector != None:
-        # Load pickled model from file and unpickle, if it isn't already loaded
-
-        if model is None:
-            with open("video2.pkl", 'rb') as f:
-                model = pickle.load(f)
-
-        predictions = model.predict([vector])
-        print("predictions:", predictions)
-        prediction = predictions[0]
-        return prediction
-    else:
-        raise BadVideoException("Bad video")
-
-def lambda_handler(event, context):
-
-    print(f"the event is {event}")
-    try:
-        prediction = main(event)
-        return {
-            'statusCode': 200,
-            'body': json.dumps({"bestGuess": prediction, "errorMessage": None}),
-            'headers': {
-                "Access-Control-Allow-Origin" : "*",
-            }
-        }
-    except BadVideoException as err:
-        return {
-            'statusCode': 200,
-            'body': json.dumps({"bestGuess": None, "errorMessage": str(err)}),
-            'headers': {
-                "Access-Control-Allow-Origin" : "*",
-            }
-        }
-    except BaseException as err:
-        print({
-            'statusCode': 500,
-            'body': '"' + str(err) + '"',
-            'headers': {
-                "Access-Control-Allow-Origin" : "*",
-            }
-        })
-        return {
-            'statusCode': 500,
-            'body': '"' + str(err) + '"',
-            'headers': {
-                "Access-Control-Allow-Origin" : "*",
-            }
-        }
-
