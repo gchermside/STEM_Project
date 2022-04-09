@@ -1,8 +1,8 @@
-import boto3
 import passwords
 import os
 import pickle
 import json
+import library
 import sklearn
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import RandomForestRegressor
@@ -111,17 +111,12 @@ def trainModel(XTrain, yTrain):
     return model
 
 
-client = boto3.client(
-    's3',
-    aws_access_key_id = str(passwords.AWSAccessKeyId),
-    aws_secret_access_key = str(passwords.AWSSecretKey),
-    region_name = 'us-east-1'
-)
 
 
 
 def saveModel(model, fileName):
     with open(f"../models/{fileName}.pkl", "wb") as outfile:
+        print("going to dump model")
         pickle.dump(model, outfile, protocol=5)
 
 
@@ -149,25 +144,28 @@ def readInData():
         infoJson = directory+"/"+subDir+"/info.json"
         with open(landmarksJson, 'r') as landmarkFile:
             jsonReadableLandmarks = json.load(landmarkFile)
-            with open(infoJson, "r") as infoFile:
-                jsonReadableInfo = json.load(infoFile)
-                if "  " in jsonReadableInfo['signName']:
-                    print("bad name is ", jsonReadableInfo['signName'], ")")
-                    print("bad file is ", infoJson)
-                    print("bad username is ", jsonReadableInfo['userName'])
-                    if jsonReadableInfo['userName'] == "":
-                        print("no username")
-                        print("is video is ", jsonReadableInfo["isVideo"])
-                        print("may capture data is ", jsonReadableInfo["mayCaptureData"])
-                    if jsonReadableInfo['userName'] == "Joshua Beckman":
-                        signName = jsonReadableInfo['signName'].strip().lower()
+            try:
+                with open(infoJson, "r") as infoFile:
+                    jsonReadableInfo = json.load(infoFile)
+                    if "  " in jsonReadableInfo['signName']:
+                        print("bad name is ", jsonReadableInfo['signName'], ")")
+                        print("bad file is ", infoJson)
+                        print("bad username is ", jsonReadableInfo['userName'])
+                        if jsonReadableInfo['userName'] == "":
+                            print("no username")
+                            print("is video is ", jsonReadableInfo["isVideo"])
+                            print("may capture data is ", jsonReadableInfo["mayCaptureData"])
+                        if jsonReadableInfo['userName'] == "Joshua Beckman":
+                            signName = jsonReadableInfo['signName'].strip().lower()
+                            addSign(jsonReadableInfo, signName, jsonReadableLandmarks, videoHandDic, imageHandDic)
+                        if jsonReadableInfo["userName"] == "Kurt Metz":
+                            print("is video is ", jsonReadableInfo["isVideo"])
+                    else:
+                        signName = jsonReadableInfo['signName']
+                        signName = signName.lower()
                         addSign(jsonReadableInfo, signName, jsonReadableLandmarks, videoHandDic, imageHandDic)
-                    if jsonReadableInfo["userName"] == "Kurt Metz":
-                        print("is video is ", jsonReadableInfo["isVideo"])
-                else:
-                    signName = jsonReadableInfo['signName']
-                    signName = signName.lower()
-                    addSign(jsonReadableInfo, signName, jsonReadableLandmarks, videoHandDic, imageHandDic)
+            except BaseException as err:
+                print("opening info file error",str(err))
     return imageHandDic, videoHandDic
 
 
@@ -186,7 +184,7 @@ def buildVideo1and2dics(videoHandDicNotRegularized, LEN_OF_ONE_HANDED_VECTOR):
     videoHandDic2 = {}
     for key, value in videoHandDicNotRegularized.items():
         for video in value:
-            newVideo = regularlizeVideo(video)
+            newVideo = library.regularlizeVideo(video)
             if newVideo is not None:
                 print("length", len(newVideo))
                 if len(newVideo) == LEN_OF_ONE_HANDED_VECTOR:

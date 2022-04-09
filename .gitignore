@@ -2,3 +2,8 @@ passwords.js
 s3data/uploads/*
 lambdas/findPicture/deploy/*
 passwords.py
+out/*
+s3Data/*
+/python-test-module/__pycache__
+__pycache__
+/uploads/*
