@@ -8,11 +8,12 @@ model = None
 
 def main(event):
     global model
-
     video = json.loads(event['body'])
     print("video", video)
     vector = regularlizeVideo(video)
     print("vector", vector)
+    if vector is None:
+        raise BadDataException()
 
     # Load pickled model from file and unpickle, if it isn't already loaded
 
@@ -26,30 +27,4 @@ def main(event):
     return prediction
 
 def lambda_handler(event, context):
-
-    print(f"the event is {event}")
-    try:
-        prediction = main(event)
-        return {
-            'statusCode': 200,
-            'body': json.dumps({"bestGuess": prediction}),
-            'headers': {
-                "Access-Control-Allow-Origin" : "*",
-            }
-        }
-    except BaseException as err:
-        print({
-            'statusCode': 500,
-            'body': '"' + str(err) + '"',
-            'headers': {
-                "Access-Control-Allow-Origin" : "*",
-            }
-        })
-        return {
-            'statusCode': 500,
-            'body': '"' + str(err) + '"',
-            'headers': {
-                "Access-Control-Allow-Origin" : "*",
-            }
-        }
-
+    return standardHandler(event, context, main)

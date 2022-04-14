@@ -6,9 +6,6 @@ from library import *
 model = None
 
 
-class BadVideoException(Exception):
-    def __init__(self, message):
-        super().__init__(self, message)
 
 
 def interpolateCoordinate(p1, p2, percent):
@@ -176,41 +173,8 @@ def main(event):
         prediction = predictions[0]
         return prediction
     else:
-        raise BadVideoException("Bad video")
+        raise BadDataException()
+
 
 def lambda_handler(event, context):
-
-    print(f"the event is {event}")
-    try:
-        prediction = main(event)
-        return {
-            'statusCode': 200,
-            'body': json.dumps({"bestGuess": prediction, "errorMessage": None}),
-            'headers': {
-                "Access-Control-Allow-Origin" : "*",
-            }
-        }
-    except BadVideoException as err:
-        return {
-            'statusCode': 200,
-            'body': json.dumps({"bestGuess": None, "errorMessage": str(err)}),
-            'headers': {
-                "Access-Control-Allow-Origin" : "*",
-            }
-        }
-    except BaseException as err:
-        print({
-            'statusCode': 500,
-            'body': '"' + str(err) + '"',
-            'headers': {
-                "Access-Control-Allow-Origin" : "*",
-            }
-        })
-        return {
-            'statusCode': 500,
-            'body': '"' + str(err) + '"',
-            'headers': {
-                "Access-Control-Allow-Origin" : "*",
-            }
-        }
-
+    return standardHandler(event, context, main)

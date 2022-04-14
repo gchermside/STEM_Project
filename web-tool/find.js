@@ -137,10 +137,18 @@ function saveVideo(landmarkList, videoAsBlob) {
         .then(function (response) {
             response.json()
                 .then(function (json) {
-                    console.log("I think the answer is: ", json.bestGuess);
-                    const guessElem = document.getElementById("guess")
-                    guessElem.innerText = json.bestGuess;
-                    guessElem.classList.remove("hidden");
+                    if (json.errorMessage === null || json.errorMessage === undefined){
+                        console.log("I think the answer is: ", json.bestGuess);
+                        const guessElem = document.getElementById("guess");
+                        guessElem.innerText = json.bestGuess;
+                        guessElem.classList.remove("hidden");
+                    } else {
+                        console.log("error message is ");
+                        console.log(json.errorMessage);
+                        const errorElem = document.getElementById("error");
+                        errorElem.classList.remove("hidden");
+                        console.log("error, not enough data");
+                    };
                 });
         })
         .catch(function (err) {

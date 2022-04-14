@@ -77,6 +77,7 @@ def regularlizeVideo(video):
     frames1 = 0
     frames2 = 0
     if len(video) < 5:
+        print("returning none")
         return None
     for frame in video:
         if len(frame) == 0:
@@ -149,3 +150,48 @@ def vectorHand(hand):
             return None
     print('video vector len is ', len(vector))
     return vector
+
+def standardHandler(event, context, main):
+    print(f"the event is {event}")
+    try:
+        prediction = main(event)
+        return {
+            'statusCode': 200,
+            'body': json.dumps({"bestGuess": prediction}),
+            'headers': {
+                "Access-Control-Allow-Origin" : "*",
+            }
+        }
+    except BadDataException as err:
+        print({
+            'statusCode': 200,
+            'body': '"' + str(err) + '"',
+            'headers': {
+                "Access-Control-Allow-Origin" : "*",
+            }
+        })
+        return {
+            'statusCode': 200,
+            'body': '"' + str(err) + '"',
+            'headers': {
+                "Access-Control-Allow-Origin" : "*",
+            }
+        }
+    except BaseException as err:
+        print({
+            'statusCode': 500,
+            'body': '"' + str(err) + '"',
+            'headers': {
+                "Access-Control-Allow-Origin" : "*",
+            }
+        })
+        return {
+            'statusCode': 500,
+            'body': '"' + str(err) + '"',
+            'headers': {
+                "Access-Control-Allow-Origin" : "*",
+            }
+        }
+
+class BadDataException(Exception):
+    pass
