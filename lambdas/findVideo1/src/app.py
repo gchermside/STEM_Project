@@ -1,6 +1,6 @@
 import json
 import pickle
-# import sklearn
+import sklearn
 from library import *
 
 model = None
@@ -18,8 +18,10 @@ def main(event):
     # Load pickled model from file and unpickle, if it isn't already loaded
 
     if model is None:
+        print("about to load model")
         with open("video1.pkl", 'rb') as f:
             model = pickle.load(f)
+        print("finished loading model")
 
     predictions = model.predict([vector])
     print("predictions:", predictions)

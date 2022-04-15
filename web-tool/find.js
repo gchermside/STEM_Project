@@ -88,6 +88,7 @@ function saveSingleFrame(handResults, imageAsBlob) {
                     const guessElem = document.getElementById("guess")
                     guessElem.innerText = json.bestGuess;
                     guessElem.classList.remove("hidden");
+                    window.location.href = 'word.html';
                 });
         })
         .catch(function(err) {
@@ -142,6 +143,7 @@ function saveVideo(landmarkList, videoAsBlob) {
                         const guessElem = document.getElementById("guess");
                         guessElem.innerText = json.bestGuess;
                         guessElem.classList.remove("hidden");
+                        window.location.href = 'word.html';
                     } else {
                         console.log("error message is ");
                         console.log(json.errorMessage);
