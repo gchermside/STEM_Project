@@ -84,11 +84,7 @@ function saveSingleFrame(handResults, imageAsBlob) {
         .then(function(response){
             response.json()
                 .then(function(json){
-                    console.log("I think the answer is: ", json.bestGuess);
-                    const guessElem = document.getElementById("guess")
-                    guessElem.innerText = json.bestGuess;
-                    guessElem.classList.remove("hidden");
-                    window.location.href = 'word.html';
+                    displayFindResult(json, "picture");
                 });
         })
         .catch(function(err) {
@@ -139,11 +135,7 @@ function saveVideo(landmarkList, videoAsBlob) {
             response.json()
                 .then(function (json) {
                     if (json.errorMessage === null || json.errorMessage === undefined){
-                        console.log("I think the answer is: ", json.bestGuess);
-                        const guessElem = document.getElementById("guess");
-                        guessElem.innerText = json.bestGuess;
-                        guessElem.classList.remove("hidden");
-                        window.location.href = 'word.html';
+                        displayFindResult(json, "video");
                     } else {
                         console.log("error message is ");
                         console.log(json.errorMessage);
@@ -166,6 +158,17 @@ function saveFrameForFindOrCollect(handResults, imageAsBlob) {
 function saveVideoForFindOrCollect(landmarkList, blobEventData) {
     saveVideo(landmarkList, blobEventData);
 }
+
+
+function displayFindResult(json, pictureOrVideo) {
+    console.log("I think the answer is: ", json.bestGuess);
+    const guessElem = document.getElementById("guess");
+    guessElem.innerText = json.bestGuess;
+    guessElem.classList.remove("hidden");
+    const url = 'word.html?word='+encodeURIComponent(json.bestGuess)+'&pictureOrVideo=' + pictureOrVideo;
+    window.location.href = url;
+}
+
 
 
 // ==== MAIN FUNCTION ====
