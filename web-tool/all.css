@@ -83,12 +83,12 @@ h1 {
 }
 
 h2 {
-    color: rgba(174, 174, 174);
+    color: rgba(190, 190, 190);
     text-align: center;
 }
 
 p {
-    color: rgba(174, 174, 174);
+    color: rgba(190, 190, 190);
     text-align: center;
 }
 
@@ -96,14 +96,11 @@ body {
     background-color: rgba(37, 37, 37);
 }
 
-button{
-    background-color: rgba(37, 37, 37);
-    color: rgba(174, 174, 174);
-}
+
 
 div {
     background-color: rgba(37, 37, 37);
-    color: rgba(174, 174, 174);
+    color: rgba(190, 190, 190);
 }
 
 .welcomeb {
@@ -131,4 +128,17 @@ div {
 
 .guess {
     font-size: large;
+}
+
+button {
+    transition-duration: 0.4s;
+    background-color: rgba(105, 141, 250);
+    font-size: 15px;
+    border: rgba(105, 141, 250);
+    color: rgba(37, 37, 37);
+}
+
+.button:hover {
+    background-color: rgba(37, 37, 37);
+    color: (105, 141, 250);
 }
