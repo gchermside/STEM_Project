@@ -166,7 +166,8 @@ function displayFindResult(json, pictureOrVideo) {
     guessElem.innerText = json.bestGuess;
     guessElem.classList.remove("hidden");
     const url = 'word.html?word='+encodeURIComponent(json.bestGuess)+'&pictureOrVideo=' + pictureOrVideo;
-    window.location.href = url;
+    // window.location.href = url;
+    window.open(url);
 }
 
 
