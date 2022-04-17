@@ -28,16 +28,21 @@ def readInData():
                         if jsonReadableInfo["userName"] == "Kurt Metz":
                             print("is video is ", jsonReadableInfo["isVideo"])
                     else:
-                        signName = jsonReadableInfo['signName'].strip().lower()
                         try:
-                            if jsonReadableInfo['isVideo'] is True:
-                                videoUrl = subDir+"/video.webm"
-                                addNewThing(signName, videoUrl, videoDic)
-                            else:
-                                pictureUrl = subDir+"/picture.jpeg"
-                                addNewThing(signName, pictureUrl, imageDic)
+                            if jsonReadableInfo["mayCaptureData"] == True:
+
+                                signName = jsonReadableInfo['signName'].strip().lower()
+                                try:
+                                    if jsonReadableInfo['isVideo'] is True:
+                                        videoUrl = subDir+"/video.webm"
+                                        addNewThing(signName, videoUrl, videoDic)
+                                    else:
+                                        pictureUrl = subDir+"/image.jpeg"
+                                        addNewThing(signName, pictureUrl, imageDic)
+                                except BaseException as err:
+                                    print("no picture/video or old data",str(err))
                         except BaseException as err:
-                            print("no picture/video or old data",str(err))
+                            print("opening info file error",str(err))
             except BaseException as err:
                 print("opening info file error",str(err))
     return imageDic, videoDic
