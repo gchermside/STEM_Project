@@ -20,7 +20,7 @@
     display: inline-block;
     left: 20px;
     bottom: 20px;
-    background-color: rgba(37, 37, 37);
+    background-color: rgb(37, 37, 37);
     padding: 5px;
     border: 2px solid #060606;
     border-radius: 15px;
@@ -30,7 +30,7 @@
 
 .controls .title {
     text-align: center;
-    color: rgba(105, 141, 250);
+    color: rgb(105, 141, 250);
 }
 .instructions {
     text-align: center;
@@ -45,7 +45,7 @@
     top:50%;
     left: 50%;
     margin: auto;
-    background-color: rgba(37, 37, 37);
+    background-color: rgb(37, 37, 37);
     padding: 15px;
     border: 2px solid #060606;
     border-radius: 15px;
@@ -64,7 +64,7 @@
     top:50%;
     left: 50%;
     margin: auto;
-    background-color: rgba(37, 37, 37);
+    background-color: rgb(37, 37, 37);
     padding: 15px;
     border: 2px solid #060606;
     border-radius: 15px;
@@ -77,30 +77,34 @@
     visibility: hidden;
 }
 
+.gone {
+    display: none;
+}
+
 h1 {
-    color: rgba(105, 141, 250);
+    color: rgb(105, 141, 250);
     text-align: center;
 }
 
 h2 {
-    color: rgba(190, 190, 190);
+    color: rgb(190, 190, 190);
     text-align: center;
 }
 
 p {
-    color: rgba(190, 190, 190);
+    color: rgb(190, 190, 190);
     text-align: center;
 }
 
 body {
-    background-color: rgba(37, 37, 37);
+    background-color: rgb(37, 37, 37);
 }
 
 
 
 div {
-    background-color: rgba(37, 37, 37);
-    color: rgba(190, 190, 190);
+    background-color: rgb(37, 37, 37);
+    color: rgb(190, 190, 190);
 }
 
 .welcomeb {
@@ -118,7 +122,7 @@ div {
     top:50%;
     left: 50%;
     margin: auto;
-    background-color: rgba(37, 37, 37);
+    background-color: rgb(37, 37, 37);
     padding: 15px;
     border: 2px solid #060606;
     border-radius: 15px;
@@ -132,13 +136,13 @@ div {
 
 button {
     transition-duration: 0.4s;
-    background-color: rgba(105, 141, 250);
+    background-color: rgb(105, 141, 250);
     font-size: 15px;
-    border: rgba(105, 141, 250);
-    color: rgba(37, 37, 37);
+    border: rgb(105, 141, 250);
+    color: rgb(37, 37, 37);
 }
 
 .button:hover {
-    background-color: rgba(37, 37, 37);
-    color: (105, 141, 250);
+    background-color: rgb(37, 37, 37);
+    color: rgb(105, 141, 250);
 }
