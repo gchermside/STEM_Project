@@ -164,10 +164,12 @@ function displayFindResult(json, pictureOrVideo) {
     console.log("I think the answer is: ", json.bestGuess);
     const guessElem = document.getElementById("guess");
     guessElem.innerText = json.bestGuess;
-    guessElem.classList.remove("hidden");
-    const url = 'word.html?word='+encodeURIComponent(json.bestGuess)+'&pictureOrVideo=' + pictureOrVideo;
-    // window.location.href = url;
-    window.open(url);
+    const guessBlockElem = document.getElementById("guessBlock");
+    guessBlockElem.classList.remove("hidden");
+    console.log("removed hidden");
+    // const url = 'word.html?word='+encodeURIComponent(json.bestGuess)+'&pictureOrVideo=' + pictureOrVideo;
+    // // window.location.href = url;
+    // window.open(url);
 }
 
 

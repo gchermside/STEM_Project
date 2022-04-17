@@ -19,6 +19,8 @@ function initializeAWS() {
  * @param event the system event that was generated
  */
 function onKeypress(event) {
+    const guessBlockElem = document.getElementById("guessBlock");
+    guessBlockElem.classList.add("hidden");
     if (readyToCapture && captureMode === "snapshot" && event.code === 'Space') {
         saveNextFrame = true;
         event.preventDefault(); // don't actually type a space.
@@ -36,6 +38,8 @@ function onKeypress(event) {
  * key going down to begin recording video.
  */
 function onKeydown(event) {
+    const guessBlockElem = document.getElementById("guessBlock");
+    guessBlockElem.classList.add("hidden");
     if (readyToCapture && captureMode === "video" && !recordingVideo && event.code === 'Space') {
         landmarkList = [];
         recorder = new MediaRecorder(canvasElem.captureStream());
