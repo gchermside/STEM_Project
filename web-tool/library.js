@@ -20,7 +20,9 @@ function initializeAWS() {
  */
 function onKeypress(event) {
     const guessBlockElem = document.getElementById("guessBlock");
-    guessBlockElem.classList.add("hidden");
+    if(guessBlockElem !== null) {
+        guessBlockElem.classList.add("hidden");
+    }
     if (readyToCapture && captureMode === "snapshot" && event.code === 'Space') {
         saveNextFrame = true;
         event.preventDefault(); // don't actually type a space.
@@ -39,13 +41,16 @@ function onKeypress(event) {
  */
 function onKeydown(event) {
     const guessBlockElem = document.getElementById("guessBlock");
-    guessBlockElem.classList.add("hidden");
+    if(guessBlockElem !== null) {
+        guessBlockElem.classList.add("hidden");
+    }
     if (readyToCapture && captureMode === "video" && !recordingVideo && event.code === 'Space') {
         landmarkList = [];
         recorder = new MediaRecorder(canvasElem.captureStream());
         recorder.ondataavailable = onVideoDataAvailable;
         recorder.start();
         recordingVideo = true;
+        console.log("about to not scroll down");
         event.preventDefault(); // don't actually process it as a space being typed.
     }
 }
