@@ -46,7 +46,11 @@ function onKeydown(event) {
     }
     if (readyToCapture && captureMode === "video" && !recordingVideo && event.code === 'Space') {
         landmarkList = [];
-        recorder = new MediaRecorder(canvasElem.captureStream());
+        if(!MediaRecorder.isTypeSupported("video/webm")) {
+            console.log("You may be using Safari, webm isn't supported");
+            return;
+        }
+        recorder = new MediaRecorder(canvasElem.captureStream(), {mimeType: "video/webm"});
         recorder.ondataavailable = onVideoDataAvailable;
         recorder.start();
         recordingVideo = true;

@@ -121,3 +121,9 @@ aws s3 sync s3://asl-dictionary-uploads/uploads s3://asl-dictionary/media-storag
 aws s3 sync s3://asl-dictionary-uploads/uploads s3://asl-dictionary/media-storage --exclude "*" --include "*/video.webm"
 
 http://localhost:8000/word.html?word=a&pictureOrVideo=picture
+
+
+video works: 2022-03-06T23_47_29.225Z-2381033
+video doesn't work: 2022-03-22T18_01_52.266Z-7724064 2022-03-22T17_59_35.884Z-3815439 2022-03-22T18_41_32.909Z-1840737 2022-03-22T19_05_57.896Z-2492890
+
+use convertio to convet files from mkv to webm works
