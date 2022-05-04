@@ -130,6 +130,14 @@ div {
     width: auto;
 }
 
+
+.spacePosition {
+    top: 2%;
+    left: 2%;
+}
+
+
+
 .guess {
     font-size: large;
 }

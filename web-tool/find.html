@@ -18,6 +18,10 @@
 <div class="container">
     <video class="input_video"></video>
     <canvas class="output_canvas" width="1280px" height="720px"></canvas>
+    <div >
+        <h2 class="guessBlock spacePosition" id="pictureSpaceMessage">Press Spacebar to Capture Picture</h2>
+        <h2 class="guessBlock spacePosition hidden" id="videoSpaceMessage">Hold Spacebar While Making Sign</h2>
+    </div>
     <div class="controls">
         <div class="title">Controls</a><a href="infoFind.html" target="_blank"><button>i</button></a></div>
         <br>
@@ -55,6 +59,7 @@
         <div class="guess">My sign prediction is:</div>
         <div class="guess" id="guess"></div>
     </div>
+
     <div class="hidden" id="error">We're sorry, but that didn't have enough data, try taking a longer video or keep your hands in frame</div>
 </div>
 <script type="text/javascript" src="passwords.js"></script>

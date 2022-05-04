@@ -31,9 +31,13 @@ let globalBlobEvent;
 function initializeControls() {
     document.getElementById("snapshot").onclick = function(event) {
         captureMode = "snapshot";
+        document.getElementById("pictureSpaceMessage").classList.remove("hidden");
+        document.getElementById("videoSpaceMessage").classList.add("hidden");
     };
     document.getElementById("video").onclick = function() {
         captureMode = "video";
+        document.getElementById("pictureSpaceMessage").classList.add("hidden");
+        document.getElementById("videoSpaceMessage").classList.remove("hidden");
     }
     document.getElementById("right").onclick = function() {
         isRightHanded = true;
@@ -167,9 +171,9 @@ function displayFindResult(json, pictureOrVideo) {
     const guessBlockElem = document.getElementById("guessBlock");
     guessBlockElem.classList.remove("hidden");
     console.log("removed hidden");
-    // const url = 'word.html?word='+encodeURIComponent(json.bestGuess)+'&pictureOrVideo=' + pictureOrVideo;
-    // // window.location.href = url;
-    // window.open(url);
+    const url = 'word.html?word='+encodeURIComponent(json.bestGuess)+'&pictureOrVideo=' + pictureOrVideo;
+    // window.location.href = url;
+    window.open(url);
 }
 
 
