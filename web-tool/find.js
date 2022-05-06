@@ -171,9 +171,11 @@ function displayFindResult(json, pictureOrVideo) {
     const guessBlockElem = document.getElementById("guessBlock");
     guessBlockElem.classList.remove("hidden");
     console.log("removed hidden");
-    const url = 'word.html?word='+encodeURIComponent(json.bestGuess)+'&pictureOrVideo=' + pictureOrVideo;
-    // window.location.href = url;
-    window.open(url);
+    if(pictureOrVideo === "video") {
+        const url = 'word.html?word='+encodeURIComponent(json.bestGuess)+'&pictureOrVideo=' + pictureOrVideo;
+        // window.location.href = url;
+        window.open(url);
+    }
 }
 
 

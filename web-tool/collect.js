@@ -36,9 +36,13 @@ let signName = ""
 function initializeControls() {
     document.getElementById("snapshot").onclick = function(event) {
         captureMode = "snapshot";
+        document.getElementById("pictureSpaceMessage").classList.remove("hidden");
+        document.getElementById("videoSpaceMessage").classList.add("hidden");
     };
     document.getElementById("video").onclick = function() {
         captureMode = "video";
+        document.getElementById("pictureSpaceMessage").classList.add("hidden");
+        document.getElementById("videoSpaceMessage").classList.remove("hidden");
     }
     document.getElementById("right").onclick = function() {
         isRightHanded = true;
