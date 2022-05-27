@@ -29,7 +29,7 @@ def toVectorandRegularize(image):
     vector = []
     if len(image) == 1:
         for unRegHand in image:
-            hand = functions.regularizeJsonHand(unRegHand)
+            hand = library.regularizeJsonHand(unRegHand)
             for points in hand:
                 vector.append(points["x"])
                 vector.append(points["y"])
