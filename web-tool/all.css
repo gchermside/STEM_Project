@@ -159,3 +159,8 @@ button {
     background-color: rgb(37, 37, 37);
     color: rgb(105, 141, 250);
 }
+
+.image {
+    width: 50%;
+    height: auto;
+}
