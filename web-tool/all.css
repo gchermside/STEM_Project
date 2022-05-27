@@ -164,3 +164,8 @@ button {
     width: 50%;
     height: auto;
 }
+
+p2 {
+   color: rgb(190, 190, 190);
+   text-align: left;
+}
