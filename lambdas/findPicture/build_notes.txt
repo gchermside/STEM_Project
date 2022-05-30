@@ -4,9 +4,10 @@ docker build -t find-picture .
 #   docker run -p 9000:8080 find-picture
 #   curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -H 'Content-Type: application/json' -d '{"body": "{\"data\":\"0.10\"}"}'
 
-aws ecr get-login-password --region us-east-1 --profile mcherm-genevieve | docker login --username AWS --password-stdin 537053210946.dkr.ecr.us-east-1.amazonaws.com
+aws ecr get-login-password --region us-east-1 --profile stem-computer | docker login --username AWS --password-stdin 537053210946.dkr.ecr.us-east-1.amazonaws.com
 docker tag find-picture:latest 537053210946.dkr.ecr.us-east-1.amazonaws.com/find-picture:latest
 docker push 537053210946.dkr.ecr.us-east-1.amazonaws.com/find-picture:latest
+aws lambda update-function-code --no-cli-pager --region us-east-1 --profile stem-computer --function-name findPicture --image-uri 537053210946.dkr.ecr.us-east-1.amazonaws.com/find-picture:latest
 
 # To test it as an API run this:
 # NOTE: The below isn't right
