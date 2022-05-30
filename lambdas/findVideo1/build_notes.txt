@@ -10,6 +10,8 @@ docker build -t find-video1 .
 aws ecr get-login-password --region us-east-1 --profile stem-computer | docker login --username AWS --password-stdin 537053210946.dkr.ecr.us-east-1.amazonaws.com
 docker tag find-video1:latest 537053210946.dkr.ecr.us-east-1.amazonaws.com/find-video1:latest
 docker push 537053210946.dkr.ecr.us-east-1.amazonaws.com/find-video1:latest
+aws lambda update-function-code --no-cli-pager --region us-east-1 --profile stem-computer --function-name findVideo1 --image-uri 537053210946.dkr.ecr.us-east-1.amazonaws.com/find-video1:latest
+
 
 # To test it as an API run this:
 # NOTE: The below isn't right
