@@ -44,8 +44,8 @@ def readPictureDic(dic):
         if "  " in key:
             print("spaces, skipping")
         else:
-            if len(key) >1:
-                print("not single letter or number, skipping")
+            if len(key) >1 and not key == "one": #FIXME
+                print("not single letter or number, skipping "+key)
             else:
                 for item in items:
                     vector = toVectorandRegularize(item)
