@@ -97,7 +97,7 @@ def machineLearning(X, y):
     for i in range(0, len(yTest)):
         if prediction[i] != yTest[i]:
             totalWrong = totalWrong+1
-        print(f"prediction {prediction[i]} is actually {yTest[i]}")
+            print(f"prediction {prediction[i]} is actually {yTest[i]}")
     print(f"percentage wrong: {totalWrong/len(yTest) * 100}")
     print(totalWrong)
     print(len(yTest))
