@@ -1,4 +1,7 @@
 # cd lambdas/findPicture/src
+cp ../../../python-test-module/src/library.py .
+cp ../../../python-test-module/models/picture.pkl .
+
 docker build -t find-picture .
 # To test it locally run these 2 lines in separate command windows:
 #   docker run -p 9000:8080 find-picture
