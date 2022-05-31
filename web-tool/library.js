@@ -11,6 +11,15 @@ function initializeAWS() {
 }
 
 
+function capturePicture() {
+    const guessBlockElem = document.getElementById("guessBlock");
+    if (guessBlockElem !== null) {
+        guessBlockElem.classList.add("hidden");
+    }
+    if (readyToCapture && captureMode === "snapshot") {
+        saveNextFrame = true;
+    }
+}
 /*
  * Function called when the user presses a key (while the browser is in the forefront).
  *
@@ -19,12 +28,7 @@ function initializeAWS() {
  * @param event the system event that was generated
  */
 function onKeypress(event) {
-    const guessBlockElem = document.getElementById("guessBlock");
-    if(guessBlockElem !== null) {
-        guessBlockElem.classList.add("hidden");
-    }
-    if (readyToCapture && captureMode === "snapshot" && event.code === 'Space') {
-        saveNextFrame = true;
+    if (event.code === 'Space') {
         event.preventDefault(); // don't actually type a space.
     }
     if (recordingVideo && event.code === 'Space') {
@@ -34,17 +38,12 @@ function onKeypress(event) {
 }
 
 
-
-/*
- * Function that is called when a key goes down. Used to watch for the space
- * key going down to begin recording video.
- */
-function onKeydown(event) {
+function startVideoCapture() {
     const guessBlockElem = document.getElementById("guessBlock");
     if(guessBlockElem !== null) {
         guessBlockElem.classList.add("hidden");
     }
-    if (readyToCapture && captureMode === "video" && !recordingVideo && event.code === 'Space') {
+    if (readyToCapture && captureMode === "video" && !recordingVideo) {
         landmarkList = [];
         if(!MediaRecorder.isTypeSupported("video/webm")) {
             console.log("You may be using Safari, webm isn't supported");
@@ -54,8 +53,19 @@ function onKeydown(event) {
         recorder.ondataavailable = onVideoDataAvailable;
         recorder.start();
         recordingVideo = true;
+    }
+
+}
+
+/*
+ * Function that is called when a key goes down. Used to watch for the space
+ * key going down to begin recording video.
+ */
+function onKeydown(event) {
+    if (event.code === 'Space') {
         console.log("about to not scroll down");
         event.preventDefault(); // don't actually process it as a space being typed.
+        startCapture()
     }
 }
 

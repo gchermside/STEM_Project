@@ -33,6 +33,9 @@ function initializeControls() {
         captureMode = "snapshot";
         document.getElementById("pictureSpaceMessage").classList.remove("hidden");
         document.getElementById("videoSpaceMessage").classList.add("hidden");
+        if(!document.getElementById("mobileButtons").classList.contains("gone")) {
+
+        }
     };
     document.getElementById("video").onclick = function() {
         captureMode = "video";
@@ -50,6 +53,15 @@ function initializeControls() {
     };
     document.getElementById("two").onclick = function() {
         isOneHanded = false;
+    }
+    if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
+        // true for mobile device
+        mobileButtonsElem = document.getElementById("mobileButtons");
+        mobileButtonsElem.classList.remove("gone");
+    }else{
+        // false for not mobile device
+        mobileButtonsElem = document.getElementById("mobileButtons");
+        mobileButtonsElem.classList.remove("gone");
     }
 }
 
