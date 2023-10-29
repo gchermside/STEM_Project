@@ -39,6 +39,19 @@
     visibility: hidden;
 }
 
+.heading {
+    font-size: xxx-large;
+}
+
+.aslLogo {
+    width: 450px;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
 .saving {
     position: absolute; /*maybe should be relative if we want side bar */
     display: inline-block;
@@ -109,6 +122,16 @@ div {
 
 .welcomeb {
     text-align: center;
+}
+
+.largeText {
+    font-size: large;
+}
+
+.intro {
+    margin-top: 5vh;
+    margin-left: 10vw;
+    margin-right: 10vw;
 }
 
 .dcp {
